@@ -479,20 +479,7 @@
         <i class="fas fa-info-circle"></i> <span id="statusText">Ready — paste link and analyze</span>
     </div>
 
-    <!-- Optional cutter card (hidden initially) -->
-    <div id="cutterSection" class="card-pane" style="display: none;">
-        <div class="section-label"><i class="fas fa-cut"></i> PRECISION CUT (optional)</div>
-        <div class="cutter-grid">
-            <div class="time-field">
-                <label>Start (MM:SS or seconds)</label>
-                <input type="text" id="startCut" placeholder="00:00" value="00:00">
-            </div>
-            <div class="time-field">
-                <label>End (MM:SS)</label>
-                <input type="text" id="endCut" placeholder="e.g., 01:30">
-            </div>
-        </div>
-    </div>
+    
 
     <!-- Progress container -->
     <div id="progressArea" class="progress-module">
@@ -616,43 +603,47 @@
     }
 
     // download trigger with cut params
-    function triggerDownload(formatId, btnElement) {
-        if (!currentUrl) return;
-        const startVal = document.getElementById('startCut').value.trim() || "00:00";
-        const endVal = document.getElementById('endCut').value.trim();
-        btnElement.disabled = true;
-        showSuccess("Initiating secure download stream...");
-        startProgressTracking();
+    // Updated triggerDownload function
+function triggerDownload(formatId, btnElement) {
+    if (!currentUrl) return;
+    
+    btnElement.disabled = true;
+    showSuccess("Initiating secure download stream...");
+    startProgressTracking();
 
-        fetch('/download', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ url: currentUrl, format_id: formatId, start_time: startVal, end_time: endVal })
+    // Sirf URL aur Format ID bhej rahe hain
+    fetch('/download', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+            url: currentUrl, 
+            format_id: formatId 
         })
-        .then(response => {
-            if (!response.ok) throw new Error("download failed");
-            return response.blob();
-        })
-        .then(blob => {
-            const dlUrl = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = dlUrl;
-            a.download = formatId.includes('audio') ? "audio_track.mp3" : "nexus_media.mp4";
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            URL.revokeObjectURL(dlUrl);
-            stopProgressTracking();
-            showSuccess("Download completed ✓");
-            btnElement.disabled = false;
-        })
-        .catch(err => {
-            console.warn(err);
-            stopProgressTracking();
-            showError("Download error: server side issue");
-            btnElement.disabled = false;
-        });
-    }
+    })
+    .then(response => {
+        if (!response.ok) throw new Error("download failed");
+        return response.blob();
+    })
+    .then(blob => {
+        const dlUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = dlUrl;
+        a.download = formatId.includes('audio') ? "audio_track.mp3" : "nexus_media.mp4";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(dlUrl);
+        stopProgressTracking();
+        showSuccess("Download completed ✓");
+        btnElement.disabled = false;
+    })
+    .catch(err => {
+        console.warn(err);
+        stopProgressTracking();
+        showError("Download error: server side issue");
+        btnElement.disabled = false;
+    });
+}
 
     
 
@@ -720,7 +711,6 @@ tr.innerHTML = `
         formatsList = data.formats || [];
         renderFormats(formatsList);
         resultsDiv.style.display = "grid";
-        cutterDiv.style.display = "block";
         playlistDiv.style.display = "none";
         // banner download handler
         bannerBtn.onclick = () => {
