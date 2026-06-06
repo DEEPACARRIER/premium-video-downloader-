@@ -185,16 +185,13 @@ def download():
     data = request.json
     url = data.get('url')
     format_id = data.get('format_id')
-    start_time = data.get('start_time', '00:00')
-    end_time = data.get('end_time', '')
     
     download_progress['current'] = 0
     try:
         ydl_opts = {
             'progress_hooks': [progress_hook], 
             'outtmpl': f'{TEMP_DIR}/%(title)s.%(ext)s',
-            'ignoreerrors': True,
-            'ext': 'mp4'
+            'ignoreerrors': True
         }
         
         if format_id == 'bestaudio':
@@ -203,25 +200,16 @@ def download():
                 'postprocessors': [{'key': 'FFmpegExtractAudio', 'preferredcodec': 'mp3', 'preferredquality': '192'}],
             })
         else:
-            if format_id == 'best' or 'instagram' in url.lower() or 'facebook' in url.lower():
+            if format_id == 'best':
                 ydl_opts['format'] = 'best'
             else:
                 ydl_opts['format'] = f"{format_id}+bestaudio/best"
                 ydl_opts['merge_output_format'] = 'mp4'
 
-        if (start_time and start_time != '00:00') or end_time:
-            ydl_opts['download_ranges'] = lambda info, ctx: [{
-                'start_time': yt_dlp.utils.timestr_to_secs(start_time or '00:00'),
-                'end_time': yt_dlp.utils.timestr_to_secs(end_time) if end_time else float('inf')
-            }]
-            ydl_opts['force_keyframes_at_cuts'] = True
-
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=True)
-            if 'entries' in info: 
-                info = info['entries'][0]
+            if 'entries' in info: info = info['entries'][0]
             file_path = ydl.prepare_filename(info)
-            
             base, _ = os.path.splitext(file_path)
             file_path = base + ('.mp3' if format_id == 'bestaudio' else '.mp4')
 
@@ -232,8 +220,7 @@ def download():
             def delete_temp_file():
                 if os.path.exists(file_path): os.remove(file_path)
             return response
-        else:
-            return jsonify({'success': False, 'message': 'File download matrix compilation failed.'})
+        return jsonify({'success': False, 'message': 'Download failed'})
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)})
 
