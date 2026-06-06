@@ -10,6 +10,20 @@ download_progress = {}
 if not os.path.exists(TEMP_DIR):
     os.makedirs(TEMP_DIR, exist_ok=True)
 
+
+
+
+@app.route('/')
+def home():
+    return render_template('index.html')
+
+@app.route('/header')
+def serve_header():
+    return render_template('header.html')
+
+
+
+
 # 🔥 Headers - Browser jaisa dikhne ke liye
 DEFAULT_HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
