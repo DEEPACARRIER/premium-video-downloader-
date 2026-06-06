@@ -2,328 +2,832 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚡ NextGen Multi-Downloader Studio</title>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Nexus Download Hub | Professional Media Suite</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* 🎨 NEW THEME: Cyberpunk Glassmorphism UI */
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Space Grotesk', sans-serif; }
-        body { background: #03000a; background-image: radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(236, 72, 153, 0.12) 0%, transparent 40%); color: #f8fafc; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
-        
-        .app-wrapper { width: 100%; max-width: 900px; background: rgba(13, 10, 28, 0.75); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 32px; padding: 45px; box-shadow: 0 40px 100px -20px rgba(0,0,0,0.8); }
-        
-        /* ⚡ GLOWING ULTRA BANNER */
-        .premium-banner { text-align: center; margin-bottom: 40px; padding: 30px; background: rgba(255, 255, 255, 0.02); border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.04); position: relative; overflow: hidden; }
-        .premium-banner h1 { font-size: 38px; font-weight: 800; background: linear-gradient(90deg, #818cf8, #ec4899, #34d399); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -1px; }
-        .premium-banner p { color: #94a3b8; font-size: 15px; margin-top: 8px; font-weight: 500; }
-        
-        .studio-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 20px; padding: 26px; margin-bottom: 24px; transition: 0.3s ease; }
-        .studio-card:hover { border-color: rgba(129, 140, 248, 0.3); }
-        .card-title { font-size: 12px; font-weight: 700; color: #a5b4fc; margin-bottom: 18px; text-transform: uppercase; letter-spacing: 0.12em; display: flex; align-items: center; gap: 8px; }
-        
-        /* Input & Core Fields */
-        .search-block { display: flex; gap: 14px; }
-        input[type="text"] { flex: 1; padding: 18px 24px; background: #090614; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; color: white; font-size: 15px; outline: none; transition: 0.2s; }
-        input[type="text"]:focus { border-color: #818cf8; box-shadow: 0 0 20px rgba(129, 140, 248, 0.2); }
-        
-        .btn-analyze { padding: 18px 36px; background: linear-gradient(135deg, #6366f1, #4f46e5); border: none; border-radius: 16px; color: white; font-weight: 700; font-size: 15px; cursor: pointer; transition: 0.2s; box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.4); }
-        .btn-analyze:hover { transform: translateY(-2px); box-shadow: 0 15px 30px -5px rgba(99, 102, 241, 0.6); }
-        
-        /* ✂️ TIMER CONTROL (HIDDEN BY DEFAULT WHEN DYNAMIC LOAD IS IDLE) */
-        #cutterCard { display: none; border-left: 4px solid #ec4899; }
-        .cutter-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .time-box-field { display: flex; flex-direction: column; gap: 8px; }
-        .time-box-field label { font-size: 12px; color: #94a3b8; font-weight: 600; }
-        .time-box-field input { padding: 14px; background: #090614; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; color: white; font-size: 15px; text-align: center; font-weight: 700; outline: none; }
-        .time-box-field input:focus { border-color: #ec4899; }
-        
-        #status { text-align: center; font-weight: 600; font-size: 14px; margin: 20px 0; color: #94a3b8; }
-        
-        /* Dynamic Matrix Grid */
-        .results-grid { display: grid; grid-template-columns: 1fr; gap: 35px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 35px; display: none; }
-        @media(min-width: 720px) { .results-grid { grid-template-columns: 280px 1fr; } }
-        
-        .media-preview-box { display: flex; flex-direction: column; gap: 16px; }
-        .video-thumbnail-media { width: 100%; border-radius: 18px; border: 1px solid rgba(255, 255, 255, 0.1); object-fit: cover; box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
-        .media-title-text { font-size: 15px; font-weight: 600; color: #f1f5f9; line-height: 1.5; }
-        
-        /* Live Realtime Loader */
-        .progress-wrapper-box { background: #090614; border-radius: 16px; padding: 16px; margin-bottom: 25px; display: none; border: 1px solid rgba(255, 255, 255, 0.05); }
-        .progress-track-bg { background: rgba(255,255,255,0.05); height: 8px; border-radius: 10px; overflow: hidden; }
-        .progress-fill-bar { height: 100%; background: linear-gradient(90deg, #818cf8, #ec4899); width: 0%; transition: width 0.2s; }
-        .progress-status-percentage { font-size: 12px; color: #a5b4fc; text-align: right; margin-top: 8px; font-weight: 700; }
-        
-        /* Matrix Data Sheets */
-        .table-scroller { width: 100%; overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; text-align: left; }
-        th { padding: 16px; background: #090614; color: #64748b; font-weight: 700; text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em; }
-        td { padding: 18px 16px; border-bottom: 1px solid rgba(255, 255, 255, 0.03); font-size: 14px; font-weight: 500; }
-        .badge-premium-res { background: rgba(129, 140, 248, 0.12); color: #c7d2fe; padding: 6px 12px; border-radius: 8px; font-weight: 700; border: 1px solid rgba(129, 140, 248, 0.2); }
-        
-        .action-cell { display: flex; gap: 8px; }
-        .btn-dl-final { padding: 12px 20px; background: linear-gradient(135deg, #10b981, #059669); border: none; border-radius: 12px; color: white; font-weight: 700; cursor: pointer; flex: 1; transition: 0.2s; }
-        .btn-dl-final:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3); }
-        .btn-gdrive { padding: 12px 14px; background: rgba(250, 204, 21, 0.1); border: 1px solid #facc15; border-radius: 12px; color: #facc15; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 13px; transition: 0.2s; }
-        .btn-gdrive:hover { background: #facc15; color: #000; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-        /* 📜 AUTO PLAYLIST MODULE LAYOUT */
-        #playlistBox { display: none; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 35px; }
-        .playlist-wrapper-grid { display: flex; flex-direction: column; gap: 12px; max-height: 400px; overflow-y: auto; padding-right: 8px; }
-        .playlist-item { background: rgba(255, 255, 255, 0.02); padding: 16px 20px; border-radius: 14px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255, 255, 255, 0.05); transition: 0.2s; }
-        .playlist-item:hover { background: rgba(255, 255, 255, 0.04); border-color: rgba(236, 72, 153, 0.2); }
-        .p-title { font-size: 14px; color: #e2e8f0; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 75%; }
-        .btn-p-dl { padding: 10px 18px; background: linear-gradient(135deg, #ec4899, #db2777); border: none; border-radius: 10px; color: white; font-weight: 700; cursor: pointer; font-size: 12px; transition: 0.2s; }
-        .btn-p-dl:hover { transform: scale(1.03); }
+        body {
+            background: #f5f7fc;
+            font-family: 'Inter', sans-serif;
+            padding: 2rem 1.5rem;
+            color: #1e293b;
+        }
+
+        /* main container - elegant spacious card */
+        .app-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 2rem;
+            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.02);
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+
+        /* refined header with gradient accent */
+        .studio-header {
+            padding: 1.8rem 2.5rem 1.2rem;
+            border-bottom: 1px solid #eef2f6;
+            background: #ffffff;
+        }
+
+        .studio-header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #1F2B48, #2C3E66);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .studio-header h1 i {
+            background: none;
+            -webkit-background-clip: unset;
+            background-clip: unset;
+            color: #2c3e66;
+            font-size: 1.7rem;
+        }
+
+        .subhead {
+            color: #5b6e8c;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            font-weight: 450;
+            border-left: 3px solid #cddfe7;
+            padding-left: 0.8rem;
+        }
+
+        /* card-like sections with subtle rounding */
+        .card-pane {
+            padding: 1.8rem 2.5rem;
+            border-bottom: 1px solid #edf2f7;
+            background: #ffffff;
+        }
+
+        .card-pane:last-of-type {
+            border-bottom: none;
+        }
+
+        .section-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 700;
+            color: #5e7a9c;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-label i {
+            font-size: 0.85rem;
+            color: #3b5a8c;
+        }
+
+        /* URL row - clean flex */
+        .url-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .url-input-wrapper {
+            flex: 1;
+            min-width: 240px;
+        }
+
+        .url-input-wrapper input {
+            width: 100%;
+            padding: 0.9rem 1.2rem;
+            border-radius: 1rem;
+            border: 1.5px solid #e2e8f0;
+            background: #ffffff;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: 0.2s;
+            font-family: 'Inter', monospace;
+            color: #0f172a;
+        }
+
+        .url-input-wrapper input:focus {
+            outline: none;
+            border-color: #8aa9c9;
+            box-shadow: 0 0 0 3px rgba(74, 108, 147, 0.1);
+        }
+
+        .btn-primary {
+            background: #1f2f47;
+            border: none;
+            padding: 0.9rem 2rem;
+            border-radius: 1rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .btn-primary:hover {
+            background: #142135;
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px -8px rgba(31, 47, 71, 0.25);
+        }
+
+        /* status zone */
+        .status-area {
+            background: #f8fafd;
+            margin: 0 2.5rem 1rem 2.5rem;
+            border-radius: 1rem;
+            padding: 0.9rem 1.2rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #2c5f8a;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-left: 4px solid #8aa9c9;
+        }
+
+        /* cutter card (refined) */
+        .cutter-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            background: #fbfdff;
+            border-radius: 1.25rem;
+            padding: 0.2rem 0;
+        }
+
+        .time-field {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .time-field label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #6b7f9b;
+            text-transform: uppercase;
+        }
+
+        .time-field input {
+            background: #ffffff;
+            border: 1px solid #e2edf2;
+            padding: 0.7rem 1rem;
+            border-radius: 0.9rem;
+            font-weight: 500;
+            font-size: 0.85rem;
+            width: 140px;
+            font-family: monospace;
+        }
+
+        /* RESULT SECTION: modern two column layout */
+        .results-panel {
+            display: none;
+            grid-template-columns: 280px 1fr;
+            gap: 2rem;
+            margin-top: 0.8rem;
+        }
+
+        @media (max-width: 720px) {
+            .results-panel {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            .card-pane {
+                padding: 1.5rem;
+            }
+            .studio-header {
+                padding: 1.2rem 1.5rem;
+            }
+        }
+
+        .thumbnail-card {
+            background: #fafcff;
+            border-radius: 1.25rem;
+            overflow: hidden;
+            border: 1px solid #eef2f8;
+            transition: 0.1s;
+        }
+
+        .thumbnail-img {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            object-fit: cover;
+            display: block;
+            background: #eef3fa;
+        }
+
+        .banner-download-btn {
+            background: none;
+            border: 1px solid #ccdbe9;
+            width: calc(100% - 1.5rem);
+            margin: 0.9rem 0.75rem 0.75rem;
+            padding: 0.5rem;
+            border-radius: 2rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #3e5d82;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .banner-download-btn:hover {
+            background: #eef3fc;
+            border-color: #9bb7d4;
+            color: #1f2f47;
+        }
+
+        .media-title {
+            font-weight: 700;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            padding: 0.75rem 1rem 0.2rem;
+            color: #1e2f44;
+        }
+
+        .media-meta {
+            font-size: 0.7rem;
+            color: #7e92ac;
+            padding: 0 1rem 1rem;
+            font-weight: 500;
+        }
+
+        /* progress bar subtle */
+        .progress-module {
+            background: #f4f8fe;
+            border-radius: 1rem;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+
+        .progress-bar-bg {
+            background: #e1e9f2;
+            border-radius: 30px;
+            height: 6px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            width: 0%;
+            height: 100%;
+            background: #2e5a8b;
+            border-radius: 30px;
+            transition: width 0.2s ease;
+        }
+
+        .progress-text {
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+            text-align: right;
+            color: #4b6f96;
+        }
+
+        /* elegant table */
+        .format-table-wrapper {
+            overflow-x: auto;
+            border-radius: 1rem;
+        }
+
+        .format-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .format-table th {
+            text-align: left;
+            padding: 0.9rem 0.5rem 0.7rem 0;
+            font-weight: 600;
+            color: #5f7f9e;
+            border-bottom: 1px solid #eaf0f5;
+        }
+
+        .format-table td {
+            padding: 0.9rem 0.5rem 0.9rem 0;
+            border-bottom: 1px solid #f0f4fa;
+            color: #1f3a4f;
+            font-weight: 500;
+        }
+
+        .res-badge {
+            background: #eef3fc;
+            padding: 0.25rem 0.7rem;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #28577e;
+            display: inline-block;
+        }
+
+        .action-group {
+            display: flex;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-download {
+            background: #eef2f9;
+            border: none;
+            padding: 0.45rem 1rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            font-size: 0.7rem;
+            color: #1e3b5c;
+            cursor: pointer;
+            transition: 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-download i {
+            font-size: 0.7rem;
+        }
+
+        .btn-download:hover {
+            background: #1f2f47;
+            color: white;
+        }
+
+        .btn-drive {
+            background: #fef7e0;
+            border: none;
+            padding: 0.45rem 0.9rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            font-size: 0.7rem;
+            color: #b26b00;
+            cursor: pointer;
+        }
+
+        .btn-drive:hover {
+            background: #ffecb3;
+        }
+
+        /* playlist styling - minimal professional */
+        .playlist-section {
+            display: none;
+            margin-top: 0.5rem;
+            background: #fbfdff;
+            border-radius: 1.2rem;
+        }
+
+        .playlist-header {
+            padding: 0.5rem 0 1rem;
+            font-weight: 700;
+            color: #2e557a;
+        }
+
+        .playlist-grid {
+            max-height: 380px;
+            overflow-y: auto;
+            border: 1px solid #ecf3f9;
+            border-radius: 1rem;
+            background: #ffffff;
+        }
+
+        .playlist-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.9rem 1rem;
+            border-bottom: 1px solid #f0f5fb;
+        }
+
+        .playlist-item:last-child {
+            border-bottom: none;
+        }
+
+        .playlist-title {
+            font-weight: 500;
+            font-size: 0.85rem;
+            color: #253e5c;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 70%;
+        }
+
+        .playlist-dl-btn {
+            background: #eaf1fa;
+            border: none;
+            padding: 0.4rem 1rem;
+            border-radius: 1.5rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #2f5e8c;
+            cursor: pointer;
+        }
+
+        hr {
+            margin: 0;
+            border-color: #eef2f8;
+        }
+
+        i, .fas, .far {
+            pointer-events: none;
+        }
+        button:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
-
-<div class="app-wrapper">
-    <div class="premium-banner">
-        <h1>⚡ Ultra Downloader Pro</h1>
-        <p>Studio Matrix — Universal Engine for YouTube, Instagram, Facebook & Playlists</p>
+<div class="app-container">
+    <div class="studio-header">
+        <h1><i class="fas fa-cloud-download-alt"></i> Nexus Download Hub</h1>
+        <div class="subhead">Professional media suite · YouTube · Instagram · Facebook · Playlists · Smart trimming</div>
     </div>
-    
-    <div class="studio-card">
-        <div class="card-title">🔗 Step 1: Input Stream Destination URL</div>
-        <div class="search-block">
-            <input type="text" id="videoUrl" placeholder="Paste Video Link or YouTube Playlist Endpoint here...">
-            <button id="fetchBtn" class="btn-analyze" onclick="processLink()">Analyze Stream</button>
+
+    <div class="card-pane">
+        <div class="section-label"><i class="fas fa-link"></i> SOURCE URL</div>
+        <div class="url-row">
+            <div class="url-input-wrapper">
+                <input type="text" id="sourceUrl" placeholder="Paste video, reel, or playlist link ..." autocomplete="off">
+            </div>
+            <button id="analyzeBtn" class="btn-primary"><i class="fas fa-waveform"></i> Analyze</button>
         </div>
     </div>
 
-    <div class="studio-card" id="cutterCard">
-        <div class="card-title">✂️ Step 2: Precision Video Cutter / Range Compiler (Optional)</div>
-        <div class="cutter-layout">
-            <div class="time-box-field">
-                <label>Trim Start Timestamp (MM:SS)</label>
-                <input type="text" id="startTime" value="00:00" placeholder="00:00">
+    <div id="statusMessage" class="status-area">
+        <i class="fas fa-info-circle"></i> <span id="statusText">Ready — paste link and analyze</span>
+    </div>
+
+    <!-- Optional cutter card (hidden initially) -->
+    <div id="cutterSection" class="card-pane" style="display: none;">
+        <div class="section-label"><i class="fas fa-cut"></i> PRECISION CUT (optional)</div>
+        <div class="cutter-grid">
+            <div class="time-field">
+                <label>Start (MM:SS or seconds)</label>
+                <input type="text" id="startCut" placeholder="00:00" value="00:00">
             </div>
-            <div class="time-box-field">
-                <label>Trim End Timestamp (MM:SS)</label>
-                <input type="text" id="endTime" value="" placeholder="e.g., 02:45 (Leave blank for full stream)">
+            <div class="time-field">
+                <label>End (MM:SS)</label>
+                <input type="text" id="endCut" placeholder="e.g., 01:30">
             </div>
         </div>
     </div>
-    
-    <div id="status"></div>
 
-    <div id="resultBox" class="results-grid">
-        <div class="media-preview-box">
-            <img id="vThumb" class="video-thumbnail-media" src="" alt="Thumbnail Art">
-            <div id="vTitle" class="media-title-text"></div>
-            <div id="vMeta" style="font-size: 12px; color: #64748b; font-weight: 600; margin-top: -6px;"></div>
+    <!-- Progress container -->
+    <div id="progressArea" class="progress-module">
+        <div class="progress-bar-bg"><div id="progressFill" class="progress-fill"></div></div>
+        <div id="progressMsg" class="progress-text">0%</div>
+    </div>
+
+    <!-- Main results section: thumbnail + formats table -->
+    <div id="resultsContainer" class="card-pane results-panel">
+        <div class="thumbnail-card">
+            <img id="thumbImg" class="thumbnail-img" src="https://placehold.co/400x225?text=Preview" alt="thumbnail">
+            <button id="bannerDownloadBtn" class="banner-download-btn"><i class="fas fa-image"></i> Download artwork</button>
+            <div id="mediaTitleDisplay" class="media-title">—</div>
+            <div id="mediaMetaDisplay" class="media-meta">—</div>
         </div>
-        
-        <div style="width: 100%;">
-            <div id="progressContainer" class="progress-wrapper-box">
-                <div class="progress-track-bg"><div id="progressBar" class="progress-fill-bar"></div></div>
-                <div id="progressText" class="progress-status-percentage">0% Transcoding Files...</div>
-            </div>
-
-            <div class="table-scroller">
-                <table>
+        <div>
+            <div class="format-table-wrapper">
+                <table class="format-table">
                     <thead>
-                        <tr>
-                            <th>Resolution</th>
-                            <th>Est Size</th>
-                            <th>Action Matrix</th>
-                        </tr>
+                        <tr><th>Quality</th><th>Approx. size</th><th>Actions</th></tr>
                     </thead>
-                    <tbody id="linksTableBody"></tbody>
+                    <tbody id="formatsTableBody"></tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    <div id="playlistBox">
-        <div class="card-title" id="playlistMainTitle" style="color: #34d399; font-size: 15px; margin-bottom: 20px;">📋 Playlist Array Matrix</div>
-        <div id="playlistContainer" class="playlist-wrapper-grid"></div>
+    <!-- Playlist block -->
+    <div id="playlistBlock" class="card-pane playlist-section">
+        <div class="playlist-header" id="playlistTitleBlock"></div>
+        <div id="playlistItemsContainer" class="playlist-grid"></div>
     </div>
 </div>
 
 <script>
-let savedUrl = "";
-let progressInterval = null;
+    // --------------------- STATE ---------------------------------
+    let currentUrl = "";
+    let currentThumbnail = "";
+    let currentMediaTitle = "";
+    let formatsList = []; // store format objects {id, resolution, size}
+    let isPlaylistMode = false;
+    let progressInterval = null;
+    let activeFetch = false;
 
-function processLink() {
-    const url = document.getElementById('videoUrl').value;
-    const status = document.getElementById('status');
-    const fetchBtn = document.getElementById('fetchBtn');
-    const resultBox = document.getElementById('resultBox');
-    const playlistBox = document.getElementById('playlistBox');
-    const cutterCard = document.getElementById('cutterCard');
-    
-    if(!url) {
-        status.innerHTML = "⚠️ Please provide a valid link first.";
-        status.style.color = "#f43f5e";
-        return;
+    // DOM elements
+    const sourceInput = document.getElementById('sourceUrl');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const statusSpan = document.getElementById('statusText');
+    const cutterDiv = document.getElementById('cutterSection');
+    const resultsDiv = document.getElementById('resultsContainer');
+    const playlistDiv = document.getElementById('playlistBlock');
+    const progressContainer = document.getElementById('progressArea');
+    const progressFill = document.getElementById('progressFill');
+    const progressMsgSpan = document.getElementById('progressMsg');
+    const thumbImg = document.getElementById('thumbImg');
+    const mediaTitleSpan = document.getElementById('mediaTitleDisplay');
+    const mediaMetaSpan = document.getElementById('mediaMetaDisplay');
+    const bannerBtn = document.getElementById('bannerDownloadBtn');
+    const formatsBody = document.getElementById('formatsTableBody');
+
+    // helper: reset UI except basic
+    function resetUIForNewFetch() {
+        if (progressInterval) clearInterval(progressInterval);
+        progressContainer.style.display = "none";
+        resultsDiv.style.display = "none";
+        playlistDiv.style.display = "none";
+        cutterDiv.style.display = "none";
+        formatsBody.innerHTML = "";
+        isPlaylistMode = false;
+        statusSpan.innerText = "Processing request...";
+        document.getElementById('statusMessage').style.borderLeftColor = "#ffb347";
     }
-    
-    savedUrl = url;
-    status.innerHTML = "🔍 Compiling global extraction nodes... Please wait.";
-    status.style.color = "#6366f1";
-    fetchBtn.disabled = true;
-    
-    // Smooth reset states
-    resultBox.style.display = "none";
-    playlistBox.style.display = "none";
-    cutterCard.style.display = "none";
-    document.getElementById('progressContainer').style.display = "none";
-    
-    fetch('/get_info', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: url })
-    })
-    .then(res => res.json())
-    .then(data => {
-        fetchBtn.disabled = false;
-        if(data.success) {
-            status.innerHTML = "✅ Extraction stream completed!";
-            status.style.color = "#10b981";
-            
-            if(data.is_playlist) {
-                // Render Playlists
-                document.getElementById('playlistMainTitle').innerText = `📋 Playlist: ${data.playlist_title} (${data.videos.length} Tracks Detected)`;
-                const pContainer = document.getElementById('playlistContainer');
-                pContainer.innerHTML = "";
-                
-                data.videos.forEach(v => {
-                    const block = document.createElement('div');
-                    block.className = "playlist-item";
-                    block.innerHTML = `
-                        <div class="p-title">${v.title}</div>
-                        <button class="btn-p-dl" onclick="processSingleTrackDirectly('${v.url}')">📥 Pull Video</button>
-                    `;
-                    pContainer.appendChild(block);
-                });
-                playlistBox.style.display = "block";
-            } else {
-                // ✂️ Dynamic Load: Show Timer Control Card ONLY on single video success
-                cutterCard.style.display = "block";
-                
-                document.getElementById('vThumb').src = data.thumbnail;
-                document.getElementById('vTitle').innerHTML = data.title;
-                document.getElementById('vMeta').innerHTML = `METADATA: ${data.duration}`;
-                
-                const tbody = document.getElementById('linksTableBody');
-                tbody.innerHTML = "";
-                
-                data.formats.forEach(f => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td><span class="badge-premium-res">${f.resolution}</span></td>
-                        <td style="color: #94a3b8; font-weight:600;">${f.size}</td>
-                        <td class="action-cell">
-                            <button class="btn-dl-final" onclick="triggerDownload('${f.id}', this)">📥 Download</button>
-                            <button class="btn-gdrive" onclick="saveToCloudDrive('${f.id}', '${data.title.replace(/'/g, "\\'")}')">☁️ Drive</button>
-                        </td>
-                    `;
-                    tbody.appendChild(row);
-                });
-                resultBox.style.display = "grid";
-            }
-        } else {
-            status.innerHTML = "❌ " + data.message;
-            status.style.color = "#f43f5e";
+
+    function showError(msg) {
+        statusSpan.innerText = msg;
+        document.getElementById('statusMessage').style.borderLeftColor = "#e25c5c";
+        statusSpan.style.color = "#c24141";
+        analyzeBtn.disabled = false;
+        activeFetch = false;
+    }
+
+    function showSuccess(msg) {
+        statusSpan.innerText = msg;
+        document.getElementById('statusMessage').style.borderLeftColor = "#7fa9c4";
+        statusSpan.style.color = "#2c5f8a";
+    }
+
+    // start progress simulation from server
+    function startProgressTracking() {
+        if (progressInterval) clearInterval(progressInterval);
+        progressContainer.style.display = "block";
+        progressFill.style.width = "0%";
+        progressMsgSpan.innerText = "0% preparing...";
+        progressInterval = setInterval(() => {
+            fetch('/get_progress')
+                .then(res => res.json())
+                .then(data => {
+                    let prog = data.progress || 0;
+                    if (prog > 100) prog = 100;
+                    progressFill.style.width = prog + "%";
+                    progressMsgSpan.innerText = prog + "% · transcoding stream";
+                    if (prog >= 100) {
+                        clearInterval(progressInterval);
+                        progressMsgSpan.innerText = "Complete!";
+                    }
+                })
+                .catch(() => {});
+        }, 900);
+    }
+
+    function stopProgressTracking() {
+        if (progressInterval) {
+            clearInterval(progressInterval);
+            progressInterval = null;
         }
-    })
-    .catch(() => {
-        fetchBtn.disabled = false;
-        status.innerHTML = "❌ Script initialization crash.";
-        status.style.color = "#f43f5e";
-    });
-}
+        progressFill.style.width = "100%";
+        progressMsgSpan.innerText = "Finalized";
+        setTimeout(() => {
+            if(progressContainer) progressContainer.style.display = "none";
+        }, 1200);
+    }
 
-function processSingleTrackDirectly(vUrl) {
-    document.getElementById('videoUrl').value = vUrl;
-    processLink();
-}
+    // download trigger with cut params
+    function triggerDownload(formatId, btnElement) {
+        if (!currentUrl) return;
+        const startVal = document.getElementById('startCut').value.trim() || "00:00";
+        const endVal = document.getElementById('endCut').value.trim();
+        btnElement.disabled = true;
+        showSuccess("Initiating secure download stream...");
+        startProgressTracking();
 
-function startProgressCheck() {
-    const pContainer = document.getElementById('progressContainer');
-    const pBar = document.getElementById('progressBar');
-    const pText = document.getElementById('progressText');
-    
-    pContainer.style.display = "block";
-    pBar.style.width = "0%";
-    pText.innerHTML = "0% Fetching media...";
-    
-    progressInterval = setInterval(() => {
-        fetch('/get_progress')
+        fetch('/download', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url: currentUrl, format_id: formatId, start_time: startVal, end_time: endVal })
+        })
+        .then(response => {
+            if (!response.ok) throw new Error("download failed");
+            return response.blob();
+        })
+        .then(blob => {
+            const dlUrl = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = dlUrl;
+            a.download = formatId.includes('audio') ? "audio_track.mp3" : "nexus_media.mp4";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(dlUrl);
+            stopProgressTracking();
+            showSuccess("Download completed ✓");
+            btnElement.disabled = false;
+        })
+        .catch(err => {
+            console.warn(err);
+            stopProgressTracking();
+            showError("Download error: server side issue");
+            btnElement.disabled = false;
+        });
+    }
+
+    function saveToDrive(formatId, btnElement) {
+        if (!currentUrl) return;
+        const startVal = document.getElementById('startCut').value.trim() || "00:00";
+        const endVal = document.getElementById('endCut').value.trim();
+        btnElement.disabled = true;
+        showSuccess("Pushing to Google Drive ...");
+        startProgressTracking();
+
+        fetch('/upload_drive', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url: currentUrl, format_id: formatId, start_time: startVal, end_time: endVal })
+        })
         .then(res => res.json())
         .then(data => {
-            let p = data.progress;
-            pBar.style.width = p + "%";
-            pText.innerHTML = p + "% Compiling server video segments...";
-            if(p >= 100) { clearInterval(progressInterval); }
+            stopProgressTracking();
+            if (data.success) {
+                showSuccess(`Drive upload success! (ID: ${data.file_id?.slice(0,12)}...)`);
+            } else {
+                showError("Drive upload: " + (data.message || "failed"));
+            }
+            btnElement.disabled = false;
+        })
+        .catch(() => {
+            stopProgressTracking();
+            showError("Drive upload failed");
+            btnElement.disabled = false;
         });
-    }, 800); 
-}
+    }
 
-function triggerDownload(formatId, buttonElement) {
-    const status = document.getElementById('status');
-    const startTime = document.getElementById('startTime').value;
-    const endTime = document.getElementById('endTime').value;
-    
-    status.innerHTML = "⚡ Starting high-speed server transcoding...";
-    status.style.color = "#10b981";
-    buttonElement.disabled = true;
-    
-    startProgressCheck();
-    
-    fetch('/download', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: savedUrl, format_id: formatId, start_time: startTime, end_time: endTime })
-    })
-    .then(response => {
-        clearInterval(progressInterval);
-        document.getElementById('progressBar').style.width = "100%";
-        document.getElementById('progressText').innerHTML = "Finished pipeline extraction!";
-        if (!response.ok) throw new Error();
-        return response.blob();
-    })
-    .then(blob => {
-        const downloadUrl = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = downloadUrl;
-        a.download = formatId === 'bestaudio' ? "Audio_Track.mp3" : "Premium_Studio_File.mp4";
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        status.innerHTML = "✅ Download successful!";
-    })
-    .catch(() => {
-        clearInterval(progressInterval);
-        status.innerHTML = "❌ Transcoding process aborted.";
-        status.style.color = "#f43f5e";
-    })
-    .finally(() => {
-        buttonElement.disabled = false;
-    });
-}
+    // render formats table
+    function renderFormats(formats) {
+        formatsBody.innerHTML = "";
+        if (!formats.length) {
+            const row = document.createElement('tr');
+            row.innerHTML = `<td colspan="3" style="padding:1rem; text-align:center;">No downloadable formats</td>`;
+            formatsBody.appendChild(row);
+            return;
+        }
+        formats.forEach(f => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><span class="res-badge">${f.resolution || f.quality || "Standard"}</span></td>
+                <td style="font-size:0.8rem;">${f.size || "~ varies"}</td>
+                <td class="action-group">
+                    <button class="btn-download" data-fid="${f.id}"><i class="fas fa-download"></i> Download</button>
+                    <button class="btn-drive" data-fid="${f.id}"><i class="fab fa-google-drive"></i> Drive</button>
+                </td>
+            `;
+            formatsBody.appendChild(tr);
+        });
+        // attach events dynamically
+        document.querySelectorAll('.btn-download').forEach(btn => {
+            const fid = btn.getAttribute('data-fid');
+            btn.addEventListener('click', (e) => triggerDownload(fid, btn));
+        });
+        document.querySelectorAll('.btn-drive').forEach(btn => {
+            const fid = btn.getAttribute('data-fid');
+            btn.addEventListener('click', (e) => saveToDrive(fid, btn));
+        });
+    }
 
-// 🔀 DYNAMIC CLOUD INTERACTION FEATURE (Saves Local Space for Phone Users)
-function saveToCloudDrive(formatId, filename) {
-    alert("🤖 Cloud-Drive Stream Hooked! File server par compile hone ke baad seedha cloud bypass processing par chali jaye gi.");
-    const startTime = document.getElementById('startTime').value;
-    const endTime = document.getElementById('endTime').value;
+    function displayPlaylist(playlistData) {
+        const container = document.getElementById('playlistItemsContainer');
+        const titleBlock = document.getElementById('playlistTitleBlock');
+        titleBlock.innerHTML = `<i class="fas fa-list-ul"></i> Playlist: ${playlistData.playlist_title || "Media Collection"} (${playlistData.videos.length} items)`;
+        container.innerHTML = "";
+        playlistData.videos.forEach(video => {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = "playlist-item";
+            itemDiv.innerHTML = `
+                <div class="playlist-title" title="${video.title}">${video.title.substring(0, 70)}</div>
+                <button class="playlist-dl-btn" data-url="${video.url}"><i class="fas fa-video"></i> Pull</button>
+            `;
+            container.appendChild(itemDiv);
+        });
+        document.querySelectorAll('.playlist-dl-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const videoUrl = btn.getAttribute('data-url');
+                sourceInput.value = videoUrl;
+                processLinkRequest();
+            });
+        });
+        playlistDiv.style.display = "block";
+        resultsDiv.style.display = "none";
+        cutterDiv.style.display = "none";
+    }
+
+    function handleSingleVideo(data) {
+        currentThumbnail = data.thumbnail;
+        currentMediaTitle = data.title;
+        thumbImg.src = data.thumbnail || "https://placehold.co/400x225?text=No+preview";
+        mediaTitleSpan.innerText = data.title.length > 70 ? data.title.slice(0,70)+"..." : data.title;
+        mediaMetaSpan.innerText = `⏱️ ${data.duration || "unknown"} · available formats`;
+        formatsList = data.formats || [];
+        renderFormats(formatsList);
+        resultsDiv.style.display = "grid";
+        cutterDiv.style.display = "block";
+        playlistDiv.style.display = "none";
+        // banner download handler
+        bannerBtn.onclick = () => {
+            if (currentThumbnail) {
+                fetch(currentThumbnail)
+                    .then(r => r.blob())
+                    .then(blob => {
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = "thumbnail_art.jpg";
+                        a.click();
+                        URL.revokeObjectURL(url);
+                        showSuccess("Artwork downloaded");
+                    })
+                    .catch(() => {
+                        const a = document.createElement('a');
+                        a.href = currentThumbnail;
+                        a.download = "thumbnail_fallback.jpg";
+                        a.target = "_blank";
+                        a.click();
+                        showSuccess("Artwork opened");
+                    });
+            } else showError("No artwork available");
+        };
+    }
+
+    // core fetch logic
+    async function processLinkRequest() {
+        const url = sourceInput.value.trim();
+        if (!url) {
+            showError("Please enter a valid URL");
+            return;
+        }
+        if (activeFetch) return;
+        activeFetch = true;
+        analyzeBtn.disabled = true;
+        resetUIForNewFetch();
+        currentUrl = url;
+
+        try {
+            const response = await fetch('/get_info', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url: url })
+            });
+            const data = await response.json();
+            if (!data.success) {
+                showError(data.message || "Failed to extract metadata");
+                analyzeBtn.disabled = false;
+                activeFetch = false;
+                return;
+            }
+            if (data.is_playlist) {
+                isPlaylistMode = true;
+                displayPlaylist(data);
+                showSuccess(`Playlist loaded: ${data.videos.length} items`);
+            } else {
+                isPlaylistMode = false;
+                handleSingleVideo(data);
+                showSuccess("Media info loaded · ready to download");
+            }
+        } catch (err) {
+            showError("Network error: " + (err.message || "server unreachable"));
+        } finally {
+            analyzeBtn.disabled = false;
+            activeFetch = false;
+        }
+    }
+
+    // event binding
+    analyzeBtn.addEventListener('click', processLinkRequest);
+    sourceInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') processLinkRequest(); });
     
-    fetch('/download', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: savedUrl, format_id: formatId, start_time: startTime, end_time: endTime })
-    })
-    .then(res => res.blob())
-    .then(blob => {
-        const file = new File([blob], formatId === 'bestaudio' ? `${filename}.mp3` : `${filename}.mp4`, {type: blob.type});
-        const storageHook = new DataTransfer();
-        storageHook.items.add(file);
-        alert("✅ Success! Transcoded media has been pushed directly into the Virtual Cloud Drive Environment storage buffer seamlessly.");
-    });
-}
+    // initial placeholder
+    showSuccess("Ready — paste link and click Analyze");
 </script>
 </body>
 </html>
