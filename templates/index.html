@@ -479,23 +479,20 @@
         <i class="fas fa-info-circle"></i> <span id="statusText">Ready — paste link and analyze</span>
     </div>
 
-    <div id="cutterSection" class="card-pane">
-    <div class="section-label">
-        <i class="fas fa-crown"></i> ELITE DOWNLOADER
-    </div>
-
-    <div class="cutter-grid">
-        <div class="time-field">
-            <label>Download Engine</label>
-            <input type="text" value="Ultra Speed Enabled" readonly>
-        </div>
-
-        <div class="time-field">
-            <label>Video Quality</label>
-            <input type="text" value="HD • Full HD • 4K" readonly>
+    <!-- Optional cutter card (hidden initially) -->
+    <div id="cutterSection" class="card-pane" style="display: none;">
+        <div class="section-label"><i class="fas fa-cut"></i> PRECISION CUT (optional)</div>
+        <div class="cutter-grid">
+            <div class="time-field">
+                <label>Start (MM:SS or seconds)</label>
+                
+            </div>
+            <div class="time-field">
+                <label>End (MM:SS)</label>
+                
+            </div>
         </div>
     </div>
-</div>
 
     <!-- Progress container -->
     <div id="progressArea" class="progress-module">
