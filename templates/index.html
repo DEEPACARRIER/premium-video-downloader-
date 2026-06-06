@@ -654,35 +654,7 @@
         });
     }
 
-    function saveToDrive(formatId, btnElement) {
-        if (!currentUrl) return;
-        const startVal = document.getElementById('startCut').value.trim() || "00:00";
-        const endVal = document.getElementById('endCut').value.trim();
-        btnElement.disabled = true;
-        showSuccess("Pushing to Google Drive ...");
-        startProgressTracking();
-
-        fetch('/upload_drive', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ url: currentUrl, format_id: formatId, start_time: startVal, end_time: endVal })
-        })
-        .then(res => res.json())
-        .then(data => {
-            stopProgressTracking();
-            if (data.success) {
-                showSuccess(`Drive upload success! (ID: ${data.file_id?.slice(0,12)}...)`);
-            } else {
-                showError("Drive upload: " + (data.message || "failed"));
-            }
-            btnElement.disabled = false;
-        })
-        .catch(() => {
-            stopProgressTracking();
-            showError("Drive upload failed");
-            btnElement.disabled = false;
-        });
-    }
+    
 
     // render formats table
     function renderFormats(formats) {
@@ -710,10 +682,7 @@ tr.innerHTML = `
             const fid = btn.getAttribute('data-fid');
             btn.addEventListener('click', (e) => triggerDownload(fid, btn));
         });
-        document.querySelectorAll('.btn-drive').forEach(btn => {
-            const fid = btn.getAttribute('data-fid');
-            btn.addEventListener('click', (e) => saveToDrive(fid, btn));
-        });
+        
     }
 
     function displayPlaylist(playlistData) {
