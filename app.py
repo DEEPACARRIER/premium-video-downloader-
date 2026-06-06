@@ -34,22 +34,23 @@ def progress_hook(d):
         download_progress['current'] = 100
 
 # ☁️ GOOGLE DRIVE UPLOAD CORE FUNCTION (SAFE ENVIRONMENT VERSION)
+# Updated Upload Function
 def upload_to_google_drive(file_path, file_name):
     try:
         SCOPES = ['https://www.googleapis.com/auth/drive.file']
-        
-        # 🔍 Render ke Environment Variables se config read karna
         env_creds = os.environ.get('GOOGLE_CREDENTIALS_JSON')
-        if not env_creds:
-            return {"success": False, "message": "Server Config Error: Render par GOOGLE_CREDENTIALS_JSON nahi mila!"}
-            
         creds_dict = json.loads(env_creds)
         creds = Credentials.from_service_account_info(creds_dict, scopes=SCOPES)
         service = build('drive', 'v3', credentials=creds)
         
-        file_metadata = {'name': file_name}
-        mimetype = 'audio/mp3' if file_path.endswith('.mp3') else 'video/mp4'
+        # Yahan 'parents' mein us folder ki ID dalen jahan file bhejni hai
+        # Agar folder ID nahi hai, toh file "root" mein jayegi (service account ki drive mein)
+        file_metadata = {
+            'name': file_name,
+            'parents': ['root'] # Yahan user ke folder ki ID bhi di ja sakti hai
+        }
         
+        mimetype = 'audio/mp3' if file_path.endswith('.mp3') else 'video/mp4'
         media = MediaFileUpload(file_path, mimetype=mimetype, resumable=True)
         file = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
         
