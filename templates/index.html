@@ -6,6 +6,7 @@
     <title>Nexus Download Hub | Professional Media Suite</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
     <style>
         * {
             margin: 0;
@@ -529,301 +530,218 @@
 
 <script>
     // --------------------- STATE ---------------------------------
-    let currentUrl = "";
-    let currentThumbnail = "";
-    let currentMediaTitle = "";
-    let formatsList = []; // store format objects {id, resolution, size}
-    let isPlaylistMode = false;
-    let progressInterval = null;
-    let activeFetch = false;
+    // --------------------- STATE ---------------------------------
+let currentUrl = "";
+let currentThumbnail = "";
+let currentMediaTitle = "";
+let formatsList = [];
+let isPlaylistMode = false;
+let progressInterval = null;
+let activeFetch = false;
 
-    // DOM elements
-    const sourceInput = document.getElementById('sourceUrl');
-    const analyzeBtn = document.getElementById('analyzeBtn');
-    const statusSpan = document.getElementById('statusText');
-    const cutterDiv = document.getElementById('cutterSection');
-    const resultsDiv = document.getElementById('resultsContainer');
-    const playlistDiv = document.getElementById('playlistBlock');
-    const progressContainer = document.getElementById('progressArea');
-    const progressFill = document.getElementById('progressFill');
-    const progressMsgSpan = document.getElementById('progressMsg');
-    const thumbImg = document.getElementById('thumbImg');
-    const mediaTitleSpan = document.getElementById('mediaTitleDisplay');
-    const mediaMetaSpan = document.getElementById('mediaMetaDisplay');
-    const bannerBtn = document.getElementById('bannerDownloadBtn');
-    const formatsBody = document.getElementById('formatsTableBody');
+// DOM elements
+const sourceInput = document.getElementById('sourceUrl');
+const analyzeBtn = document.getElementById('analyzeBtn');
+const statusSpan = document.getElementById('statusText');
+const cutterDiv = document.getElementById('cutterSection');
+const resultsDiv = document.getElementById('resultsContainer');
+const playlistDiv = document.getElementById('playlistBlock');
+const progressContainer = document.getElementById('progressArea');
+const progressFill = document.getElementById('progressFill');
+const progressMsgSpan = document.getElementById('progressMsg');
+const thumbImg = document.getElementById('thumbImg');
+const mediaTitleSpan = document.getElementById('mediaTitleDisplay');
+const mediaMetaSpan = document.getElementById('mediaMetaDisplay');
+const bannerBtn = document.getElementById('bannerDownloadBtn');
+const formatsBody = document.getElementById('formatsTableBody');
 
-    // helper: reset UI except basic
-    function resetUIForNewFetch() {
-        if (progressInterval) clearInterval(progressInterval);
-        progressContainer.style.display = "none";
-        resultsDiv.style.display = "none";
-        playlistDiv.style.display = "none";
-        cutterDiv.style.display = "none";
-        formatsBody.innerHTML = "";
-        isPlaylistMode = false;
-        statusSpan.innerText = "Processing request...";
-        document.getElementById('statusMessage').style.borderLeftColor = "#ffb347";
+// --- HELPER FUNCTIONS ---
+function resetUIForNewFetch() {
+    if (progressInterval) clearInterval(progressInterval);
+    progressContainer.style.display = "none";
+    resultsDiv.style.display = "none";
+    playlistDiv.style.display = "none";
+    cutterDiv.style.display = "none";
+    formatsBody.innerHTML = "";
+    isPlaylistMode = false;
+    statusSpan.innerText = "Processing request...";
+    document.getElementById('statusMessage').style.borderLeftColor = "#ffb347";
+}
+
+function showError(msg) {
+    statusSpan.innerText = msg;
+    document.getElementById('statusMessage').style.borderLeftColor = "#e25c5c";
+    statusSpan.style.color = "#c24141";
+    analyzeBtn.disabled = false;
+    activeFetch = false;
+}
+
+function showSuccess(msg) {
+    statusSpan.innerText = msg;
+    document.getElementById('statusMessage').style.borderLeftColor = "#7fa9c4";
+    statusSpan.style.color = "#2c5f8a";
+}
+
+// --- PROGRESS TRACKING ---
+function startProgressTracking() {
+    if (progressInterval) clearInterval(progressInterval);
+    progressContainer.style.display = "block";
+    progressFill.style.width = "0%";
+    progressMsgSpan.innerText = "0% preparing...";
+    progressInterval = setInterval(() => {
+        fetch('/get_progress')
+            .then(res => res.json())
+            .then(data => {
+                let prog = data.progress || 0;
+                if (prog > 100) prog = 100;
+                progressFill.style.width = prog + "%";
+                progressMsgSpan.innerText = prog + "% · transcoding...";
+                if (prog >= 100) {
+                    clearInterval(progressInterval);
+                    progressMsgSpan.innerText = "Complete!";
+                }
+            }).catch(() => {});
+    }, 900);
+}
+
+function stopProgressTracking() {
+    if (progressInterval) clearInterval(progressInterval);
+    progressFill.style.width = "100%";
+    progressMsgSpan.innerText = "Finalized";
+    setTimeout(() => { progressContainer.style.display = "none"; }, 1200);
+}
+
+// --- DOWNLOAD & DRIVE LOGIC ---
+async function triggerDownload(formatId, btnElement) {
+    if (!currentUrl) return;
+    const startVal = document.getElementById('startCut').value.trim() || "00:00";
+    const endVal = document.getElementById('endCut').value.trim();
+    
+    btnElement.disabled = true;
+    showSuccess("Initiating download...");
+    startProgressTracking();
+
+    try {
+        const response = await fetch('/download', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url: currentUrl, format_id: formatId, start_time: startVal, end_time: endVal })
+        });
+        if (!response.ok) throw new Error("Server error");
+        const blob = await response.blob();
+        const dlUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = dlUrl;
+        a.download = `${currentMediaTitle}.mp4`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(dlUrl);
+        stopProgressTracking();
+        showSuccess("Download completed!");
+    } catch (err) {
+        stopProgressTracking();
+        showError("Download failed");
+    } finally {
+        btnElement.disabled = false;
     }
+}
 
-    function showError(msg) {
-        statusSpan.innerText = msg;
-        document.getElementById('statusMessage').style.borderLeftColor = "#e25c5c";
-        statusSpan.style.color = "#c24141";
+async function saveToDrive(formatId, btnElement) {
+    if (!currentUrl) return;
+    btnElement.disabled = true;
+    showSuccess("Uploading to Drive...");
+    startProgressTracking();
+
+    try {
+        const res = await fetch('/upload_drive', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url: currentUrl, format_id: formatId })
+        });
+        const data = await res.json();
+        stopProgressTracking();
+        if (data.success) showSuccess("Uploaded to Drive!");
+        else showError("Drive failed: " + data.message);
+    } catch {
+        stopProgressTracking();
+        showError("Drive upload failed");
+    } finally {
+        btnElement.disabled = false;
+    }
+}
+
+// --- RENDER & DISPLAY ---
+function renderFormats(formats) {
+    formatsBody.innerHTML = "";
+    formats.forEach(f => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><span class="res-badge">${f.resolution || "SD"}</span></td>
+            <td>${f.size || "N/A"}</td>
+            <td class="action-group">
+                <button class="btn-download" onclick="triggerDownload('${f.id}', this)">Download</button>
+                <button class="btn-drive" onclick="saveToDrive('${f.id}', this)">Drive</button>
+            </td>
+        `;
+        formatsBody.appendChild(tr);
+    });
+}
+
+function displayPlaylist(playlistData) {
+    const container = document.getElementById('playlistItemsContainer');
+    document.getElementById('playlistTitleBlock').innerText = `Playlist: ${playlistData.playlist_title}`;
+    container.innerHTML = "";
+    playlistData.videos.forEach(video => {
+        const div = document.createElement('div');
+        div.className = "playlist-item";
+        div.innerHTML = `<span>${video.title}</span><button onclick="sourceInput.value='${video.url}'; processLinkRequest();">Pull</button>`;
+        container.appendChild(div);
+    });
+    playlistDiv.style.display = "block";
+}
+
+function handleSingleVideo(data) {
+    currentThumbnail = data.thumbnail;
+    currentMediaTitle = data.title;
+    thumbImg.src = data.thumbnail;
+    mediaTitleSpan.innerText = data.title;
+    renderFormats(data.formats);
+    resultsDiv.style.display = "grid";
+    cutterDiv.style.display = "block";
+}
+
+async function processLinkRequest() {
+    const url = sourceInput.value.trim();
+    if (!url) return showError("Please enter a URL");
+    if (activeFetch) return;
+    
+    activeFetch = true;
+    analyzeBtn.disabled = true;
+    resetUIForNewFetch();
+    currentUrl = url;
+
+    try {
+        const res = await fetch('/get_info', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({url: url})
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.message);
+        
+        if (data.is_playlist) displayPlaylist(data);
+        else handleSingleVideo(data);
+        showSuccess("Ready!");
+    } catch (err) {
+        showError(err.message);
+    } finally {
         analyzeBtn.disabled = false;
         activeFetch = false;
     }
+}
 
-    function showSuccess(msg) {
-        statusSpan.innerText = msg;
-        document.getElementById('statusMessage').style.borderLeftColor = "#7fa9c4";
-        statusSpan.style.color = "#2c5f8a";
-    }
-
-    // start progress simulation from server
-    function startProgressTracking() {
-        if (progressInterval) clearInterval(progressInterval);
-        progressContainer.style.display = "block";
-        progressFill.style.width = "0%";
-        progressMsgSpan.innerText = "0% preparing...";
-        progressInterval = setInterval(() => {
-            fetch('/get_progress')
-                .then(res => res.json())
-                .then(data => {
-                    let prog = data.progress || 0;
-                    if (prog > 100) prog = 100;
-                    progressFill.style.width = prog + "%";
-                    progressMsgSpan.innerText = prog + "% · transcoding stream";
-                    if (prog >= 100) {
-                        clearInterval(progressInterval);
-                        progressMsgSpan.innerText = "Complete!";
-                    }
-                })
-                .catch(() => {});
-        }, 900);
-    }
-
-    function stopProgressTracking() {
-        if (progressInterval) {
-            clearInterval(progressInterval);
-            progressInterval = null;
-        }
-        progressFill.style.width = "100%";
-        progressMsgSpan.innerText = "Finalized";
-        setTimeout(() => {
-            if(progressContainer) progressContainer.style.display = "none";
-        }, 1200);
-    }
-
-    // download trigger with cut params
-    function triggerDownload(formatId, btnElement) {
-        if (!currentUrl) return;
-        const startVal = document.getElementById('startCut').value.trim() || "00:00";
-        const endVal = document.getElementById('endCut').value.trim();
-        btnElement.disabled = true;
-        showSuccess("Initiating secure download stream...");
-        startProgressTracking();
-
-        fetch('/download', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ url: currentUrl, format_id: formatId, start_time: startVal, end_time: endVal })
-        })
-        .then(response => {
-            if (!response.ok) throw new Error("download failed");
-            return response.blob();
-        })
-        .then(blob => {
-            const dlUrl = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = dlUrl;
-            a.download = formatId.includes('audio') ? "audio_track.mp3" : "nexus_media.mp4";
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            URL.revokeObjectURL(dlUrl);
-            stopProgressTracking();
-            showSuccess("Download completed ✓");
-            btnElement.disabled = false;
-        })
-        .catch(err => {
-            console.warn(err);
-            stopProgressTracking();
-            showError("Download error: server side issue");
-            btnElement.disabled = false;
-        });
-    }
-
-    function saveToDrive(formatId, btnElement) {
-        if (!currentUrl) return;
-        const startVal = document.getElementById('startCut').value.trim() || "00:00";
-        const endVal = document.getElementById('endCut').value.trim();
-        btnElement.disabled = true;
-        showSuccess("Pushing to Google Drive ...");
-        startProgressTracking();
-
-        fetch('/upload_drive', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ url: currentUrl, format_id: formatId, start_time: startVal, end_time: endVal })
-        })
-        .then(res => res.json())
-        .then(data => {
-            stopProgressTracking();
-            if (data.success) {
-                showSuccess(`Drive upload success! (ID: ${data.file_id?.slice(0,12)}...)`);
-            } else {
-                showError("Drive upload: " + (data.message || "failed"));
-            }
-            btnElement.disabled = false;
-        })
-        .catch(() => {
-            stopProgressTracking();
-            showError("Drive upload failed");
-            btnElement.disabled = false;
-        });
-    }
-
-    // render formats table
-    function renderFormats(formats) {
-        formatsBody.innerHTML = "";
-        if (!formats.length) {
-            const row = document.createElement('tr');
-            row.innerHTML = `<td colspan="3" style="padding:1rem; text-align:center;">No downloadable formats</td>`;
-            formatsBody.appendChild(row);
-            return;
-        }
-        formats.forEach(f => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td><span class="res-badge">${f.resolution || f.quality || "Standard"}</span></td>
-                <td style="font-size:0.8rem;">${f.size || "~ varies"}</td>
-                <td class="action-group">
-                    <button class="btn-download" data-fid="${f.id}"><i class="fas fa-download"></i> Download</button>
-                    <button class="btn-drive" data-fid="${f.id}"><i class="fab fa-google-drive"></i> Drive</button>
-                </td>
-            `;
-            formatsBody.appendChild(tr);
-        });
-        // attach events dynamically
-        document.querySelectorAll('.btn-download').forEach(btn => {
-            const fid = btn.getAttribute('data-fid');
-            btn.addEventListener('click', (e) => triggerDownload(fid, btn));
-        });
-        document.querySelectorAll('.btn-drive').forEach(btn => {
-            const fid = btn.getAttribute('data-fid');
-            btn.addEventListener('click', (e) => saveToDrive(fid, btn));
-        });
-    }
-
-    function displayPlaylist(playlistData) {
-        const container = document.getElementById('playlistItemsContainer');
-        const titleBlock = document.getElementById('playlistTitleBlock');
-        titleBlock.innerHTML = `<i class="fas fa-list-ul"></i> Playlist: ${playlistData.playlist_title || "Media Collection"} (${playlistData.videos.length} items)`;
-        container.innerHTML = "";
-        playlistData.videos.forEach(video => {
-            const itemDiv = document.createElement('div');
-            itemDiv.className = "playlist-item";
-            itemDiv.innerHTML = `
-                <div class="playlist-title" title="${video.title}">${video.title.substring(0, 70)}</div>
-                <button class="playlist-dl-btn" data-url="${video.url}"><i class="fas fa-video"></i> Pull</button>
-            `;
-            container.appendChild(itemDiv);
-        });
-        document.querySelectorAll('.playlist-dl-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const videoUrl = btn.getAttribute('data-url');
-                sourceInput.value = videoUrl;
-                processLinkRequest();
-            });
-        });
-        playlistDiv.style.display = "block";
-        resultsDiv.style.display = "none";
-        cutterDiv.style.display = "none";
-    }
-
-    function handleSingleVideo(data) {
-        currentThumbnail = data.thumbnail;
-        currentMediaTitle = data.title;
-        thumbImg.src = data.thumbnail || "https://placehold.co/400x225?text=No+preview";
-        mediaTitleSpan.innerText = data.title.length > 70 ? data.title.slice(0,70)+"..." : data.title;
-        mediaMetaSpan.innerText = `⏱️ ${data.duration || "unknown"} · available formats`;
-        formatsList = data.formats || [];
-        renderFormats(formatsList);
-        resultsDiv.style.display = "grid";
-        cutterDiv.style.display = "block";
-        playlistDiv.style.display = "none";
-        // banner download handler
-        bannerBtn.onclick = () => {
-            if (currentThumbnail) {
-                fetch(currentThumbnail)
-                    .then(r => r.blob())
-                    .then(blob => {
-                        const url = URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = "thumbnail_art.jpg";
-                        a.click();
-                        URL.revokeObjectURL(url);
-                        showSuccess("Artwork downloaded");
-                    })
-                    .catch(() => {
-                        const a = document.createElement('a');
-                        a.href = currentThumbnail;
-                        a.download = "thumbnail_fallback.jpg";
-                        a.target = "_blank";
-                        a.click();
-                        showSuccess("Artwork opened");
-                    });
-            } else showError("No artwork available");
-        };
-    }
-
-    // core fetch logic
-    async function processLinkRequest() {
-        const url = sourceInput.value.trim();
-        if (!url) {
-            showError("Please enter a valid URL");
-            return;
-        }
-        if (activeFetch) return;
-        activeFetch = true;
-        analyzeBtn.disabled = true;
-        resetUIForNewFetch();
-        currentUrl = url;
-
-        try {
-            const response = await fetch('/get_info', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ url: url })
-            });
-            const data = await response.json();
-            if (!data.success) {
-                showError(data.message || "Failed to extract metadata");
-                analyzeBtn.disabled = false;
-                activeFetch = false;
-                return;
-            }
-            if (data.is_playlist) {
-                isPlaylistMode = true;
-                displayPlaylist(data);
-                showSuccess(`Playlist loaded: ${data.videos.length} items`);
-            } else {
-                isPlaylistMode = false;
-                handleSingleVideo(data);
-                showSuccess("Media info loaded · ready to download");
-            }
-        } catch (err) {
-            showError("Network error: " + (err.message || "server unreachable"));
-        } finally {
-            analyzeBtn.disabled = false;
-            activeFetch = false;
-        }
-    }
-
-    // event binding
-    analyzeBtn.addEventListener('click', processLinkRequest);
+analyzeBtn.addEventListener('click', processLinkRequest);
     sourceInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') processLinkRequest(); });
     
     // initial placeholder
