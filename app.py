@@ -202,3 +202,18 @@ def download():
 
 if __name__ == '__main__':
     app.run(debug=True)
+from googleapiclient.discovery import build
+from googleapiclient.http import MediaFileUpload
+from google.oauth2.service_account import Credentials
+
+def upload_to_drive(file_path, file_name):
+    # credentials.json file se connect karne ka tareeqa
+    SCOPES = ['https://www.googleapis.com/auth/drive.file']
+    creds = Credentials.from_service_account_file('credentials.json', scopes=SCOPES)
+    service = build('drive', 'v3', credentials=creds)
+    
+    file_metadata = {'name': file_name}
+    media = MediaFileUpload(file_path, mimetype='video/mp4', resumable=True)
+    
+    file = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
+    return file.get('id')
