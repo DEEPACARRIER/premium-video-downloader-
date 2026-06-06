@@ -480,19 +480,23 @@
     </div>
 
     <!-- Optional cutter card (hidden initially) -->
-    <div id="cutterSection" class="card-pane" style="display: none;">
-        <div class="section-label"><i class="fas fa-cut"></i> PRECISION CUT (optional)</div>
-        <div class="cutter-grid">
-            <div class="time-field">
-                <label>Start (MM:SS or seconds)</label>
-                <input type="text" id="startCut" placeholder="00:00" value="00:00">
-            </div>
-            <div class="time-field">
-                <label>End (MM:SS)</label>
-                <input type="text" id="endCut" placeholder="e.g., 01:30">
-            </div>
+<div id="cutterSection" class="card-pane" style="display: none;">
+    <div class="section-label">
+        <i class="fas fa-magic"></i> DOWNLOAD OPTIONS
+    </div>
+
+    <div class="cutter-grid">
+        <div class="time-field">
+            <label>Preferred Format</label>
+            <input type="text" id="startCut" placeholder="MP4, MP3, WEBM">
+        </div>
+
+        <div class="time-field">
+            <label>Preferred Quality</label>
+            <input type="text" id="endCut" placeholder="1080p, 720p, 480p">
         </div>
     </div>
+</div>
 
     <!-- Progress container -->
     <div id="progressArea" class="progress-module">
