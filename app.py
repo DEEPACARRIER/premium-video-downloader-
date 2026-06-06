@@ -10,7 +10,7 @@ download_progress = {}
 if not os.path.exists(TEMP_DIR):
     os.makedirs(TEMP_DIR, exist_ok=True)
 
-# Headers - Browser jaisa dikhne ke liye
+# 🔥 Headers - Browser jaisa dikhne ke liye
 DEFAULT_HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
@@ -21,10 +21,10 @@ DEFAULT_HEADERS = {
     'Upgrade-Insecure-Requests': '1',
 }
 
-# Cookies file ka path (Render environment variable se)
+# 🍪 Cookies file ka path (Render environment variable se)
 COOKIES_FILE = os.environ.get('COOKIES_FILE_PATH', '')
 if COOKIES_FILE and not os.path.exists(COOKIES_FILE):
-    COOKIES_FILE = ''
+    COOKIES_FILE = ''  # Agar file nahi hai to ignore kar do
 
 @app.after_request
 def add_header(response):
@@ -41,6 +41,7 @@ def get_base_ydl_opts():
         'no_warnings': True,
         'ignoreerrors': True,
     }
+    # Agar cookies file hai to add karo
     if COOKIES_FILE and os.path.exists(COOKIES_FILE):
         opts['cookiefile'] = COOKIES_FILE
     return opts
@@ -57,10 +58,6 @@ def progress_hook(d):
 def home():
     return render_template('index.html')
 
-@app.route('/header')
-def serve_header():
-    return render_template('header.html')
-
 @app.route('/get_progress', methods=['GET'])
 def get_progress():
     return jsonify({'progress': download_progress.get('current', 0)})
@@ -76,6 +73,7 @@ def get_info():
     try:
         download_progress['current'] = 0
         
+        # 🔥 YAHAN PEHLI JAGHA - cookies add ho gayi
         ydl_opts = get_base_ydl_opts()
         ydl_opts.update({
             'extract_flat': 'in_playlist',
@@ -175,6 +173,7 @@ def download():
     download_progress['current'] = 0
     
     try:
+        # 🔥 YAHAN DOOSRI JAGHA - cookies add ho gayi
         ydl_opts = get_base_ydl_opts()
         ydl_opts.update({
             'progress_hooks': [progress_hook],
