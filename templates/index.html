@@ -165,38 +165,36 @@
             border-left: 4px solid #8aa9c9;
         }
 
-        /* cutter card (refined) */
-        .cutter-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1.5rem;
-            background: #fbfdff;
-            border-radius: 1.25rem;
-            padding: 0.2rem 0;
+        /* progress bar subtle */
+        .progress-module {
+            background: #f4f8fe;
+            border-radius: 1rem;
+            padding: 1rem;
+            margin: 0 2.5rem 1rem 2.5rem;
+            display: none;
         }
 
-        .time-field {
-            display: flex;
-            flex-direction: column;
-            gap: 0.4rem;
+        .progress-bar-bg {
+            background: #e1e9f2;
+            border-radius: 30px;
+            height: 6px;
+            overflow: hidden;
         }
 
-        .time-field label {
+        .progress-fill {
+            width: 0%;
+            height: 100%;
+            background: #2e5a8b;
+            border-radius: 30px;
+            transition: width 0.2s ease;
+        }
+
+        .progress-text {
             font-size: 0.7rem;
-            font-weight: 700;
-            color: #6b7f9b;
-            text-transform: uppercase;
-        }
-
-        .time-field input {
-            background: #ffffff;
-            border: 1px solid #e2edf2;
-            padding: 0.7rem 1rem;
-            border-radius: 0.9rem;
-            font-weight: 500;
-            font-size: 0.85rem;
-            width: 140px;
-            font-family: monospace;
+            font-weight: 600;
+            margin-top: 0.5rem;
+            text-align: right;
+            color: #4b6f96;
         }
 
         /* RESULT SECTION: modern two column layout */
@@ -204,19 +202,24 @@
             display: none;
             grid-template-columns: 280px 1fr;
             gap: 2rem;
-            margin-top: 0.8rem;
+            margin: 0 2.5rem 1.5rem 2.5rem;
         }
 
         @media (max-width: 720px) {
             .results-panel {
                 grid-template-columns: 1fr;
                 gap: 1.5rem;
+                margin: 0 1.5rem 1.5rem 1.5rem;
             }
             .card-pane {
                 padding: 1.5rem;
             }
             .studio-header {
                 padding: 1.2rem 1.5rem;
+            }
+            .status-area, .progress-module {
+                margin-left: 1.5rem;
+                margin-right: 1.5rem;
             }
         }
 
@@ -273,38 +276,6 @@
             color: #7e92ac;
             padding: 0 1rem 1rem;
             font-weight: 500;
-        }
-
-        /* progress bar subtle */
-        .progress-module {
-            background: #f4f8fe;
-            border-radius: 1rem;
-            padding: 1rem;
-            margin-bottom: 1.5rem;
-            display: none;
-        }
-
-        .progress-bar-bg {
-            background: #e1e9f2;
-            border-radius: 30px;
-            height: 6px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            width: 0%;
-            height: 100%;
-            background: #2e5a8b;
-            border-radius: 30px;
-            transition: width 0.2s ease;
-        }
-
-        .progress-text {
-            font-size: 0.7rem;
-            font-weight: 600;
-            margin-top: 0.5rem;
-            text-align: right;
-            color: #4b6f96;
         }
 
         /* elegant table */
@@ -392,22 +363,23 @@
         /* playlist styling - minimal professional */
         .playlist-section {
             display: none;
-            margin-top: 0.5rem;
+            margin: 0 2.5rem 1.5rem 2.5rem;
             background: #fbfdff;
             border-radius: 1.2rem;
+            border: 1px solid #edf2f8;
+            overflow: hidden;
         }
 
         .playlist-header {
-            padding: 0.5rem 0 1rem;
+            padding: 1rem 1.2rem 0.5rem;
             font-weight: 700;
             color: #2e557a;
+            border-bottom: 1px solid #eef2f8;
         }
 
         .playlist-grid {
             max-height: 380px;
             overflow-y: auto;
-            border: 1px solid #ecf3f9;
-            border-radius: 1rem;
             background: #ffffff;
         }
 
@@ -415,7 +387,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0.9rem 1rem;
+            padding: 0.9rem 1.2rem;
             border-bottom: 1px solid #f0f5fb;
         }
 
@@ -442,19 +414,22 @@
             font-weight: 600;
             color: #2f5e8c;
             cursor: pointer;
+            transition: 0.15s;
         }
 
-        hr {
-            margin: 0;
-            border-color: #eef2f8;
+        .playlist-dl-btn:hover {
+            background: #d4e2f2;
         }
 
-        i, .fas, .far {
-            pointer-events: none;
-        }
         button:disabled {
             opacity: 0.65;
             cursor: not-allowed;
+        }
+        
+        .no-timer-notice {
+            font-size: 0.7rem;
+            color: #8ba0bc;
+            margin-top: 0.25rem;
         }
     </style>
 </head>
@@ -462,7 +437,7 @@
 <div class="app-container">
     <div class="studio-header">
         <h1><i class="fas fa-cloud-download-alt"></i> Nexus Download Hub</h1>
-        <div class="subhead">Professional media suite · YouTube · Instagram · Facebook · Playlists · Smart trimming</div>
+        <div class="subhead">Professional media suite · YouTube · Instagram · Facebook · Playlists · Direct download & Drive export</div>
     </div>
 
     <div class="card-pane">
@@ -473,22 +448,21 @@
             </div>
             <button id="analyzeBtn" class="btn-primary"><i class="fas fa-waveform"></i> Analyze</button>
         </div>
+        <div class="no-timer-notice"><i class="fas fa-info-circle"></i> Full original video · no trimming options · clean downloads</div>
     </div>
 
     <div id="statusMessage" class="status-area">
         <i class="fas fa-info-circle"></i> <span id="statusText">Ready — paste link and analyze</span>
     </div>
 
-    
-
-    <!-- Progress container -->
+    <!-- Progress container (only for download/upload feedback) -->
     <div id="progressArea" class="progress-module">
         <div class="progress-bar-bg"><div id="progressFill" class="progress-fill"></div></div>
         <div id="progressMsg" class="progress-text">0%</div>
     </div>
 
     <!-- Main results section: thumbnail + formats table -->
-    <div id="resultsContainer" class="card-pane results-panel">
+    <div id="resultsContainer" class="results-panel">
         <div class="thumbnail-card">
             <img id="thumbImg" class="thumbnail-img" src="https://placehold.co/400x225?text=Preview" alt="thumbnail">
             <button id="bannerDownloadBtn" class="banner-download-btn"><i class="fas fa-image"></i> Download artwork</button>
@@ -508,7 +482,7 @@
     </div>
 
     <!-- Playlist block -->
-    <div id="playlistBlock" class="card-pane playlist-section">
+    <div id="playlistBlock" class="playlist-section">
         <div class="playlist-header" id="playlistTitleBlock"></div>
         <div id="playlistItemsContainer" class="playlist-grid"></div>
     </div>
@@ -528,7 +502,6 @@
     const sourceInput = document.getElementById('sourceUrl');
     const analyzeBtn = document.getElementById('analyzeBtn');
     const statusSpan = document.getElementById('statusText');
-    const cutterDiv = document.getElementById('cutterSection');
     const resultsDiv = document.getElementById('resultsContainer');
     const playlistDiv = document.getElementById('playlistBlock');
     const progressContainer = document.getElementById('progressArea');
@@ -546,11 +519,11 @@
         progressContainer.style.display = "none";
         resultsDiv.style.display = "none";
         playlistDiv.style.display = "none";
-        cutterDiv.style.display = "none";
         formatsBody.innerHTML = "";
         isPlaylistMode = false;
         statusSpan.innerText = "Processing request...";
         document.getElementById('statusMessage').style.borderLeftColor = "#ffb347";
+        statusSpan.style.color = "#2c5f8a";
     }
 
     function showError(msg) {
@@ -580,7 +553,7 @@
                     let prog = data.progress || 0;
                     if (prog > 100) prog = 100;
                     progressFill.style.width = prog + "%";
-                    progressMsgSpan.innerText = prog + "% · transcoding stream";
+                    progressMsgSpan.innerText = prog + "% · processing stream";
                     if (prog >= 100) {
                         clearInterval(progressInterval);
                         progressMsgSpan.innerText = "Complete!";
@@ -602,70 +575,92 @@
         }, 1200);
     }
 
-    // download trigger with cut params
-    // Updated triggerDownload function
-function triggerDownload(formatId, btnElement) {
-    if (!currentUrl) return;
-    
-    btnElement.disabled = true;
-    showSuccess("Initiating secure download stream...");
-    startProgressTracking();
+    // download trigger - NO TIMER PARAMETERS, full video
+    function triggerDownload(formatId, btnElement) {
+        if (!currentUrl) return;
+        btnElement.disabled = true;
+        showSuccess("Initiating secure download...");
+        startProgressTracking();
 
-    // Sirf URL aur Format ID bhej rahe hain
-    fetch('/download', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-            url: currentUrl, 
-            format_id: formatId 
+        // removed start_time / end_time completely — pure original media
+        fetch('/download', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url: currentUrl, format_id: formatId })
         })
-    })
-    .then(response => {
-        if (!response.ok) throw new Error("download failed");
-        return response.blob();
-    })
-    .then(blob => {
-        const dlUrl = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = dlUrl;
-        a.download = formatId.includes('audio') ? "audio_track.mp3" : "nexus_media.mp4";
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(dlUrl);
-        stopProgressTracking();
-        showSuccess("Download completed ✓");
-        btnElement.disabled = false;
-    })
-    .catch(err => {
-        console.warn(err);
-        stopProgressTracking();
-        showError("Download error: server side issue");
-        btnElement.disabled = false;
-    });
-}
+        .then(response => {
+            if (!response.ok) throw new Error("download failed");
+            return response.blob();
+        })
+        .then(blob => {
+            const dlUrl = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = dlUrl;
+            a.download = formatId.includes('audio') ? "audio_track.mp3" : "nexus_media.mp4";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(dlUrl);
+            stopProgressTracking();
+            showSuccess("Download completed ✓");
+            btnElement.disabled = false;
+        })
+        .catch(err => {
+            console.warn(err);
+            stopProgressTracking();
+            showError("Download error: server side issue");
+            btnElement.disabled = false;
+        });
+    }
 
-    
+    function saveToDrive(formatId, btnElement) {
+        if (!currentUrl) return;
+        btnElement.disabled = true;
+        showSuccess("Pushing to Google Drive ...");
+        startProgressTracking();
+
+        // removed any trimming params
+        fetch('/upload_drive', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url: currentUrl, format_id: formatId })
+        })
+        .then(res => res.json())
+        .then(data => {
+            stopProgressTracking();
+            if (data.success) {
+                showSuccess(`Drive upload success! (ID: ${data.file_id?.slice(0,12)}...)`);
+            } else {
+                showError("Drive upload: " + (data.message || "failed"));
+            }
+            btnElement.disabled = false;
+        })
+        .catch(() => {
+            stopProgressTracking();
+            showError("Drive upload failed");
+            btnElement.disabled = false;
+        });
+    }
 
     // render formats table
     function renderFormats(formats) {
         formatsBody.innerHTML = "";
-        if (!formats.length) {
+        if (!formats || !formats.length) {
             const row = document.createElement('tr');
-            row.innerHTML = `<td colspan="3" style="padding:1rem; text-align:center;">No downloadable formats</td>`;
+            row.innerHTML = `<td colspan="3" style="padding:1rem; text-align:center;">No downloadable formats available</td>`;
             formatsBody.appendChild(row);
             return;
         }
         formats.forEach(f => {
             const tr = document.createElement('tr');
-            // Sirf Download button rakho
-tr.innerHTML = `
-    <td><span class="res-badge">${f.resolution || "Standard"}</span></td>
-    <td style="font-size:0.8rem;">${f.size || "~ varies"}</td>
-    <td class="action-group">
-        <button class="btn-download" data-fid="${f.id}"><i class="fas fa-download"></i> Download</button>
-    </td>
-`;
+            tr.innerHTML = `
+                <td><span class="res-badge">${f.resolution || f.quality || "Standard"}</span></td>
+                <td style="font-size:0.8rem;">${f.size || "~ varies"}</td>
+                <td class="action-group">
+                    <button class="btn-download" data-fid="${f.id}"><i class="fas fa-download"></i> Download</button>
+                    <button class="btn-drive" data-fid="${f.id}"><i class="fab fa-google-drive"></i> Drive</button>
+                 </td>
+            `;
             formatsBody.appendChild(tr);
         });
         // attach events dynamically
@@ -673,20 +668,23 @@ tr.innerHTML = `
             const fid = btn.getAttribute('data-fid');
             btn.addEventListener('click', (e) => triggerDownload(fid, btn));
         });
-        
+        document.querySelectorAll('.btn-drive').forEach(btn => {
+            const fid = btn.getAttribute('data-fid');
+            btn.addEventListener('click', (e) => saveToDrive(fid, btn));
+        });
     }
 
     function displayPlaylist(playlistData) {
         const container = document.getElementById('playlistItemsContainer');
         const titleBlock = document.getElementById('playlistTitleBlock');
-        titleBlock.innerHTML = `<i class="fas fa-list-ul"></i> Playlist: ${playlistData.playlist_title || "Media Collection"} (${playlistData.videos.length} items)`;
+        titleBlock.innerHTML = `<i class="fas fa-list-ul"></i> Playlist: ${playlistData.playlist_title || "Media Collection"} (${playlistData.videos.length} items) · Click any to load`;
         container.innerHTML = "";
         playlistData.videos.forEach(video => {
             const itemDiv = document.createElement('div');
             itemDiv.className = "playlist-item";
             itemDiv.innerHTML = `
                 <div class="playlist-title" title="${video.title}">${video.title.substring(0, 70)}</div>
-                <button class="playlist-dl-btn" data-url="${video.url}"><i class="fas fa-video"></i> Pull</button>
+                <button class="playlist-dl-btn" data-url="${video.url}"><i class="fas fa-video"></i> Select</button>
             `;
             container.appendChild(itemDiv);
         });
@@ -699,7 +697,6 @@ tr.innerHTML = `
         });
         playlistDiv.style.display = "block";
         resultsDiv.style.display = "none";
-        cutterDiv.style.display = "none";
     }
 
     function handleSingleVideo(data) {
@@ -707,12 +704,13 @@ tr.innerHTML = `
         currentMediaTitle = data.title;
         thumbImg.src = data.thumbnail || "https://placehold.co/400x225?text=No+preview";
         mediaTitleSpan.innerText = data.title.length > 70 ? data.title.slice(0,70)+"..." : data.title;
-        mediaMetaSpan.innerText = `⏱️ ${data.duration || "unknown"} · available formats`;
+        mediaMetaSpan.innerText = `⏱️ ${data.duration || "unknown duration"} · ${data.formats?.length || 0} formats available`;
         formatsList = data.formats || [];
         renderFormats(formatsList);
         resultsDiv.style.display = "grid";
         playlistDiv.style.display = "none";
-        // banner download handler
+        
+        // banner download handler (unchanged)
         bannerBtn.onclick = () => {
             if (currentThumbnail) {
                 fetch(currentThumbnail)
@@ -738,7 +736,7 @@ tr.innerHTML = `
         };
     }
 
-    // core fetch logic
+    // core fetch logic - NO TRIM REFERENCES ANYWHERE
     async function processLinkRequest() {
         const url = sourceInput.value.trim();
         if (!url) {
@@ -771,7 +769,7 @@ tr.innerHTML = `
             } else {
                 isPlaylistMode = false;
                 handleSingleVideo(data);
-                showSuccess("Media info loaded · ready to download");
+                showSuccess("Media info loaded · ready to download (no trimming)");
             }
         } catch (err) {
             showError("Network error: " + (err.message || "server unreachable"));
@@ -785,8 +783,8 @@ tr.innerHTML = `
     analyzeBtn.addEventListener('click', processLinkRequest);
     sourceInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') processLinkRequest(); });
     
-    // initial placeholder
-    showSuccess("Ready — paste link and click Analyze");
+    // initial ready state
+    showSuccess("Ready — paste link and click Analyze (timer/trim removed)");
 </script>
 </body>
 </html>
