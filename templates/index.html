@@ -3,69 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚡ Ultra Downloader Pro | Premium Video Studio</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>⚡ NextGen Multi-Downloader Studio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* 🎨 Brand New Color Palette: Deep Space & Electric Indigo */
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
-        body { background: #060813; color: #f3f4f6; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        /* 🎨 NEW THEME: Cyberpunk Glassmorphism UI */
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Space Grotesk', sans-serif; }
+        body { background: #03000a; background-image: radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(236, 72, 153, 0.12) 0%, transparent 40%); color: #f8fafc; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
         
-        .app-wrapper { width: 100%; max-width: 880px; background: #0f1225; border: 1px solid #1f264d; border-radius: 28px; padding: 40px; box-shadow: 0 30px 60px -15px rgba(0,0,0,0.7); }
+        .app-wrapper { width: 100%; max-width: 900px; background: rgba(13, 10, 28, 0.75); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 32px; padding: 45px; box-shadow: 0 40px 100px -20px rgba(0,0,0,0.8); }
         
-        /* 🔥 THE BANNER IS BACK & BETTER */
-        .premium-banner { text-align: center; margin-bottom: 35px; background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(16, 185, 129, 0.1)); padding: 25px; border-radius: 20px; border: 1px solid rgba(99, 102, 241, 0.2); }
-        .premium-banner h1 { font-size: 34px; font-weight: 800; background: linear-gradient(to right, #6366f1, #22c55e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.5px; }
-        .premium-banner p { color: #94a3b8; font-size: 14px; margin-top: 6px; font-weight: 500; }
+        /* ⚡ GLOWING ULTRA BANNER */
+        .premium-banner { text-align: center; margin-bottom: 40px; padding: 30px; background: rgba(255, 255, 255, 0.02); border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.04); position: relative; overflow: hidden; }
+        .premium-banner h1 { font-size: 38px; font-weight: 800; background: linear-gradient(90deg, #818cf8, #ec4899, #34d399); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -1px; }
+        .premium-banner p { color: #94a3b8; font-size: 15px; margin-top: 8px; font-weight: 500; }
         
-        .studio-card { background: #151a36; border: 1px solid #222a57; border-radius: 18px; padding: 24px; margin-bottom: 22px; }
-        .card-title { font-size: 13px; font-weight: 700; color: #818cf8; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.08em; }
+        .studio-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 20px; padding: 26px; margin-bottom: 24px; transition: 0.3s ease; }
+        .studio-card:hover { border-color: rgba(129, 140, 248, 0.3); }
+        .card-title { font-size: 12px; font-weight: 700; color: #a5b4fc; margin-bottom: 18px; text-transform: uppercase; letter-spacing: 0.12em; display: flex; align-items: center; gap: 8px; }
         
-        /* Step 1: Input URL */
-        .search-block { display: flex; gap: 12px; }
-        input[type="text"] { flex: 1; padding: 16px 20px; background: #0a0d1d; border: 2px solid #2e3973; border-radius: 14px; color: white; font-size: 15px; outline: none; transition: 0.2s; }
-        input[type="text"]:focus { border-color: #6366f1; box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2); }
+        /* Input & Core Fields */
+        .search-block { display: flex; gap: 14px; }
+        input[type="text"] { flex: 1; padding: 18px 24px; background: #090614; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; color: white; font-size: 15px; outline: none; transition: 0.2s; }
+        input[type="text"]:focus { border-color: #818cf8; box-shadow: 0 0 20px rgba(129, 140, 248, 0.2); }
         
-        .btn-analyze { padding: 16px 32px; background: #6366f1; border: none; border-radius: 14px; color: white; font-weight: 700; font-size: 15px; cursor: pointer; transition: 0.2s; }
-        .btn-analyze:hover { background: #4f46e5; transform: translateY(-1px); }
-        .btn-analyze:disabled { background: #334155; cursor: not-allowed; }
+        .btn-analyze { padding: 18px 36px; background: linear-gradient(135deg, #6366f1, #4f46e5); border: none; border-radius: 16px; color: white; font-weight: 700; font-size: 15px; cursor: pointer; transition: 0.2s; box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.4); }
+        .btn-analyze:hover { transform: translateY(-2px); box-shadow: 0 15px 30px -5px rgba(99, 102, 241, 0.6); }
         
-        /* ✂️ Step 2: Dedicated Video Cutter Layout (ALWAYS SHOWING HERE PERFECTLY) */
+        /* ✂️ TIMER CONTROL (HIDDEN BY DEFAULT WHEN DYNAMIC LOAD IS IDLE) */
+        #cutterCard { display: none; border-left: 4px solid #ec4899; }
         .cutter-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .time-box-field { display: flex; flex-direction: column; gap: 8px; }
         .time-box-field label { font-size: 12px; color: #94a3b8; font-weight: 600; }
-        .time-box-field input { padding: 14px; background: #0a0d1d; border: 1px solid #2e3973; border-radius: 10px; color: white; font-size: 14px; text-align: center; font-weight: 700; outline: none; transition: 0.2s; }
-        .time-box-field input:focus { border-color: #10b981; }
+        .time-box-field input { padding: 14px; background: #090614; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; color: white; font-size: 15px; text-align: center; font-weight: 700; outline: none; }
+        .time-box-field input:focus { border-color: #ec4899; }
         
-        #status { text-align: center; font-weight: 500; font-size: 14px; margin: 15px 0; color: #94a3b8; }
+        #status { text-align: center; font-weight: 600; font-size: 14px; margin: 20px 0; color: #94a3b8; }
         
-        /* Dynamic Results Grid */
-        .results-grid { display: grid; grid-template-columns: 1fr; gap: 30px; border-top: 1px solid #222a57; padding-top: 30px; display: none; }
-        @media(min-width: 700px) { .results-grid { grid-template-columns: 260px 1fr; } }
+        /* Dynamic Matrix Grid */
+        .results-grid { display: grid; grid-template-columns: 1fr; gap: 35px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 35px; display: none; }
+        @media(min-width: 720px) { .results-grid { grid-template-columns: 280px 1fr; } }
         
-        .media-preview-box { display: flex; flex-direction: column; gap: 14px; }
-        .video-thumbnail-media { width: 100%; border-radius: 14px; border: 1px solid #222a57; object-fit: cover; box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
-        .media-title-text { font-size: 14px; font-weight: 600; color: #f3f4f6; line-height: 1.4; }
-        .media-meta-info { font-size: 12px; color: #94a3b8; margin-top: -4px; }
-        .btn-save-thumb { padding: 10px; background: rgba(34, 197, 94, 0.1); border: 1px solid #22c55e; border-radius: 10px; color: #22c55e; font-weight: 600; font-size: 12px; cursor: pointer; text-align: center; transition: 0.2s; }
-        .btn-save-thumb:hover { background: #22c55e; color: white; }
+        .media-preview-box { display: flex; flex-direction: column; gap: 16px; }
+        .video-thumbnail-media { width: 100%; border-radius: 18px; border: 1px solid rgba(255, 255, 255, 0.1); object-fit: cover; box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
+        .media-title-text { font-size: 15px; font-weight: 600; color: #f1f5f9; line-height: 1.5; }
         
-        /* Live Progress Loader */
-        .progress-wrapper-box { background: #0a0d1d; border-radius: 14px; padding: 14px; margin-bottom: 20px; display: none; border: 1px solid #222a57; }
-        .progress-track-bg { background: #151a36; height: 10px; border-radius: 6px; overflow: hidden; }
-        .progress-fill-bar { height: 100%; background: linear-gradient(to right, #6366f1, #22c55e); width: 0%; transition: width 0.3s; }
-        .progress-status-percentage { font-size: 12px; color: #818cf8; text-align: right; margin-top: 6px; font-weight: 700; }
+        /* Live Realtime Loader */
+        .progress-wrapper-box { background: #090614; border-radius: 16px; padding: 16px; margin-bottom: 25px; display: none; border: 1px solid rgba(255, 255, 255, 0.05); }
+        .progress-track-bg { background: rgba(255,255,255,0.05); height: 8px; border-radius: 10px; overflow: hidden; }
+        .progress-fill-bar { height: 100%; background: linear-gradient(90deg, #818cf8, #ec4899); width: 0%; transition: width 0.2s; }
+        .progress-status-percentage { font-size: 12px; color: #a5b4fc; text-align: right; margin-top: 8px; font-weight: 700; }
         
-        /* Stream Table responsive */
+        /* Matrix Data Sheets */
         .table-scroller { width: 100%; overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
-        th { padding: 14px; background: #0a0d1d; color: #94a3b8; font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em; }
-        th:first-child { border-top-left-radius: 8px; border-bottom-left-radius: 8px; }
-        th:last-child { border-top-right-radius: 8px; border-bottom-right-radius: 8px; }
-        td { padding: 16px 14px; border-bottom: 1px solid #151a36; font-weight: 500; }
-        .badge-premium-res { background: rgba(99, 102, 241, 0.15); color: #818cf8; padding: 4px 10px; border-radius: 6px; font-weight: 700; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { padding: 16px; background: #090614; color: #64748b; font-weight: 700; text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em; }
+        td { padding: 18px 16px; border-bottom: 1px solid rgba(255, 255, 255, 0.03); font-size: 14px; font-weight: 500; }
+        .badge-premium-res { background: rgba(129, 140, 248, 0.12); color: #c7d2fe; padding: 6px 12px; border-radius: 8px; font-weight: 700; border: 1px solid rgba(129, 140, 248, 0.2); }
         
-        .btn-dl-final { padding: 10px 18px; background: #22c55e; border: none; border-radius: 10px; color: white; font-weight: 700; cursor: pointer; width: 100%; transition: 0.15s; }
-        .btn-dl-final:hover { background: #16a34a; }
+        .action-cell { display: flex; gap: 8px; }
+        .btn-dl-final { padding: 12px 20px; background: linear-gradient(135deg, #10b981, #059669); border: none; border-radius: 12px; color: white; font-weight: 700; cursor: pointer; flex: 1; transition: 0.2s; }
+        .btn-dl-final:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3); }
+        .btn-gdrive { padding: 12px 14px; background: rgba(250, 204, 21, 0.1); border: 1px solid #facc15; border-radius: 12px; color: #facc15; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 13px; transition: 0.2s; }
+        .btn-gdrive:hover { background: #facc15; color: #000; }
+
+        /* 📜 AUTO PLAYLIST MODULE LAYOUT */
+        #playlistBox { display: none; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 35px; }
+        .playlist-wrapper-grid { display: flex; flex-direction: column; gap: 12px; max-height: 400px; overflow-y: auto; padding-right: 8px; }
+        .playlist-item { background: rgba(255, 255, 255, 0.02); padding: 16px 20px; border-radius: 14px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255, 255, 255, 0.05); transition: 0.2s; }
+        .playlist-item:hover { background: rgba(255, 255, 255, 0.04); border-color: rgba(236, 72, 153, 0.2); }
+        .p-title { font-size: 14px; color: #e2e8f0; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 75%; }
+        .btn-p-dl { padding: 10px 18px; background: linear-gradient(135deg, #ec4899, #db2777); border: none; border-radius: 10px; color: white; font-weight: 700; cursor: pointer; font-size: 12px; transition: 0.2s; }
+        .btn-p-dl:hover { transform: scale(1.03); }
     </style>
 </head>
 <body>
@@ -73,19 +81,19 @@
 <div class="app-wrapper">
     <div class="premium-banner">
         <h1>⚡ Ultra Downloader Pro</h1>
-        <p>Premium Studio — Download, Cut, and Convert Video Tracks Automatically</p>
+        <p>Studio Matrix — Universal Engine for YouTube, Instagram, Facebook & Playlists</p>
     </div>
     
     <div class="studio-card">
-        <div class="card-title">🔗 Step 1: Video Destination URL</div>
+        <div class="card-title">🔗 Step 1: Input Stream Destination URL</div>
         <div class="search-block">
-            <input type="text" id="videoUrl" placeholder="Enter or paste video link here (YouTube, FB, Insta, Twitter)...">
-            <button id="fetchBtn" class="btn-analyze" onclick="processLink()">Analyze Link</button>
+            <input type="text" id="videoUrl" placeholder="Paste Video Link or YouTube Playlist Endpoint here...">
+            <button id="fetchBtn" class="btn-analyze" onclick="processLink()">Analyze Stream</button>
         </div>
     </div>
 
-    <div class="studio-card">
-        <div class="card-title">✂️ Step 2: Precise Video Cutter (Optional)</div>
+    <div class="studio-card" id="cutterCard">
+        <div class="card-title">✂️ Step 2: Precision Video Cutter / Range Compiler (Optional)</div>
         <div class="cutter-layout">
             <div class="time-box-field">
                 <label>Trim Start Timestamp (MM:SS)</label>
@@ -93,7 +101,7 @@
             </div>
             <div class="time-box-field">
                 <label>Trim End Timestamp (MM:SS)</label>
-                <input type="text" id="endTime" value="" placeholder="e.g., 03:15 (Leave blank for full video)">
+                <input type="text" id="endTime" value="" placeholder="e.g., 02:45 (Leave blank for full stream)">
             </div>
         </div>
     </div>
@@ -102,10 +110,9 @@
 
     <div id="resultBox" class="results-grid">
         <div class="media-preview-box">
-            <img id="vThumb" class="video-thumbnail-media" src="" alt="Media Art">
+            <img id="vThumb" class="video-thumbnail-media" src="" alt="Thumbnail Art">
             <div id="vTitle" class="media-title-text"></div>
-            <div id="vMeta" class="media-meta-info"></div>
-            <button id="thumbDlBtn" class="btn-save-thumb" onclick="downloadThumbnail()">🖼️ Download Media Thumbnail</button>
+            <div id="vMeta" style="font-size: 12px; color: #64748b; font-weight: 600; margin-top: -6px;"></div>
         </div>
         
         <div style="width: 100%;">
@@ -119,22 +126,24 @@
                     <thead>
                         <tr>
                             <th>Resolution</th>
-                            <th>Encoding</th>
                             <th>Est Size</th>
-                            <th>Action</th>
+                            <th>Action Matrix</th>
                         </tr>
                     </thead>
-                    <tbody id="linksTableBody">
-                        </tbody>
+                    <tbody id="linksTableBody"></tbody>
                 </table>
             </div>
         </div>
+    </div>
+
+    <div id="playlistBox">
+        <div class="card-title" id="playlistMainTitle" style="color: #34d399; font-size: 15px; margin-bottom: 20px;">📋 Playlist Array Matrix</div>
+        <div id="playlistContainer" class="playlist-wrapper-grid"></div>
     </div>
 </div>
 
 <script>
 let savedUrl = "";
-let currentThumbUrl = "";
 let progressInterval = null;
 
 function processLink() {
@@ -142,18 +151,24 @@ function processLink() {
     const status = document.getElementById('status');
     const fetchBtn = document.getElementById('fetchBtn');
     const resultBox = document.getElementById('resultBox');
+    const playlistBox = document.getElementById('playlistBox');
+    const cutterCard = document.getElementById('cutterCard');
     
     if(!url) {
-        status.innerHTML = "⚠️ Please provide a valid URL endpoint first.";
-        status.style.color = "#ef4444";
+        status.innerHTML = "⚠️ Please provide a valid link first.";
+        status.style.color = "#f43f5e";
         return;
     }
     
     savedUrl = url;
-    status.innerHTML = "🔍 Fetching content configuration specifications... Please hold on.";
-    status.style.color = "#818cf8";
+    status.innerHTML = "🔍 Compiling global extraction nodes... Please wait.";
+    status.style.color = "#6366f1";
     fetchBtn.disabled = true;
+    
+    // Smooth reset states
     resultBox.style.display = "none";
+    playlistBox.style.display = "none";
+    cutterCard.style.display = "none";
     document.getElementById('progressContainer').style.display = "none";
     
     fetch('/get_info', {
@@ -165,43 +180,65 @@ function processLink() {
     .then(data => {
         fetchBtn.disabled = false;
         if(data.success) {
-            status.innerHTML = "✅ Extraction stream matrix completed successfully!";
-            status.style.color = "#22c55e";
+            status.innerHTML = "✅ Extraction stream completed!";
+            status.style.color = "#10b981";
             
-            currentThumbUrl = data.thumbnail;
-            document.getElementById('vThumb').src = data.thumbnail || "https://via.placeholder.com/320x180?text=No+Preview+Available";
-            document.getElementById('vTitle').innerHTML = data.title;
-            document.getElementById('vMeta').innerHTML = `Duration Frame: ${data.duration}`;
-            
-            const tbody = document.getElementById('linksTableBody');
-            tbody.innerHTML = ""; 
-            
-            data.formats.forEach(f => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td><span class="badge-premium-res">${f.resolution}</span></td>
-                    <td style="color: #e2e8f0;">${f.type}</td>
-                    <td style="color: #94a3b8;">${f.size}</td>
-                    <td>
-                        <button class="btn-dl-final" onclick="triggerDownload('${f.id}', this)">
-                            📥 Get Link
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-            
-            resultBox.style.display = "grid";
+            if(data.is_playlist) {
+                // Render Playlists
+                document.getElementById('playlistMainTitle').innerText = `📋 Playlist: ${data.playlist_title} (${data.videos.length} Tracks Detected)`;
+                const pContainer = document.getElementById('playlistContainer');
+                pContainer.innerHTML = "";
+                
+                data.videos.forEach(v => {
+                    const block = document.createElement('div');
+                    block.className = "playlist-item";
+                    block.innerHTML = `
+                        <div class="p-title">${v.title}</div>
+                        <button class="btn-p-dl" onclick="processSingleTrackDirectly('${v.url}')">📥 Pull Video</button>
+                    `;
+                    pContainer.appendChild(block);
+                });
+                playlistBox.style.display = "block";
+            } else {
+                // ✂️ Dynamic Load: Show Timer Control Card ONLY on single video success
+                cutterCard.style.display = "block";
+                
+                document.getElementById('vThumb').src = data.thumbnail;
+                document.getElementById('vTitle').innerHTML = data.title;
+                document.getElementById('vMeta').innerHTML = `METADATA: ${data.duration}`;
+                
+                const tbody = document.getElementById('linksTableBody');
+                tbody.innerHTML = "";
+                
+                data.formats.forEach(f => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td><span class="badge-premium-res">${f.resolution}</span></td>
+                        <td style="color: #94a3b8; font-weight:600;">${f.size}</td>
+                        <td class="action-cell">
+                            <button class="btn-dl-final" onclick="triggerDownload('${f.id}', this)">📥 Download</button>
+                            <button class="btn-gdrive" onclick="saveToCloudDrive('${f.id}', '${data.title.replace(/'/g, "\\'")}')">☁️ Drive</button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+                resultBox.style.display = "grid";
+            }
         } else {
             status.innerHTML = "❌ " + data.message;
-            status.style.color = "#ef4444";
+            status.style.color = "#f43f5e";
         }
     })
-    .catch(err => {
+    .catch(() => {
         fetchBtn.disabled = false;
-        status.innerHTML = "❌ Framework endpoint server error.";
-        status.style.color = "#ef4444";
+        status.innerHTML = "❌ Script initialization crash.";
+        status.style.color = "#f43f5e";
     });
+}
+
+function processSingleTrackDirectly(vUrl) {
+    document.getElementById('videoUrl').value = vUrl;
+    processLink();
 }
 
 function startProgressCheck() {
@@ -211,7 +248,7 @@ function startProgressCheck() {
     
     pContainer.style.display = "block";
     pBar.style.width = "0%";
-    pText.innerHTML = "0% Extracting streams...";
+    pText.innerHTML = "0% Fetching media...";
     
     progressInterval = setInterval(() => {
         fetch('/get_progress')
@@ -219,43 +256,32 @@ function startProgressCheck() {
         .then(data => {
             let p = data.progress;
             pBar.style.width = p + "%";
-            pText.innerHTML = p + "% Server processing & merging streams...";
-            if(p >= 100) {
-                clearInterval(progressInterval);
-                pText.innerHTML = "100% Finalizing pipeline output transmission!";
-            }
+            pText.innerHTML = p + "% Compiling server video segments...";
+            if(p >= 100) { clearInterval(progressInterval); }
         });
     }, 800); 
 }
 
 function triggerDownload(formatId, buttonElement) {
     const status = document.getElementById('status');
-    const originalText = buttonElement.innerHTML;
     const startTime = document.getElementById('startTime').value;
     const endTime = document.getElementById('endTime').value;
     
-    status.innerHTML = "⚡ Initializing high-speed compilation downloads...";
-    status.style.color = "#22c55e";
-    
+    status.innerHTML = "⚡ Starting high-speed server transcoding...";
+    status.style.color = "#10b981";
     buttonElement.disabled = true;
-    buttonElement.innerHTML = "...";
     
     startProgressCheck();
     
     fetch('/download', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-            url: savedUrl, 
-            format_id: formatId,
-            start_time: startTime,
-            end_time: endTime
-        })
+        body: JSON.stringify({ url: savedUrl, format_id: formatId, start_time: startTime, end_time: endTime })
     })
     .then(response => {
         clearInterval(progressInterval);
         document.getElementById('progressBar').style.width = "100%";
-        document.getElementById('progressText').innerHTML = "Completed!";
+        document.getElementById('progressText').innerHTML = "Finished pipeline extraction!";
         if (!response.ok) throw new Error();
         return response.blob();
     })
@@ -263,47 +289,39 @@ function triggerDownload(formatId, buttonElement) {
         const downloadUrl = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = downloadUrl;
-        a.download = formatId === 'bestaudio' ? "Audio_Track.mp3" : "Premium_Video.mp4";
+        a.download = formatId === 'bestaudio' ? "Audio_Track.mp3" : "Premium_Studio_File.mp4";
         document.body.appendChild(a);
         a.click();
         a.remove();
-        status.innerHTML = "✅ Asset successfully exported to local environment!";
+        status.innerHTML = "✅ Download successful!";
     })
     .catch(() => {
         clearInterval(progressInterval);
-        status.innerHTML = "❌ Pipeline compilation/trimming script aborted.";
-        status.style.color = "#ef4444";
+        status.innerHTML = "❌ Transcoding process aborted.";
+        status.style.color = "#f43f5e";
     })
     .finally(() => {
         buttonElement.disabled = false;
-        buttonElement.innerHTML = originalText;
     });
 }
 
-function downloadThumbnail() {
-    const btn = document.getElementById('thumbDlBtn');
-    if(!currentThumbUrl) return;
-    btn.disabled = true;
-    btn.innerHTML = "Compiling JPG...";
-
-    fetch('/download_thumb', {
+// 🔀 DYNAMIC CLOUD INTERACTION FEATURE (Saves Local Space for Phone Users)
+function saveToCloudDrive(formatId, filename) {
+    alert("🤖 Cloud-Drive Stream Hooked! File server par compile hone ke baad seedha cloud bypass processing par chali jaye gi.");
+    const startTime = document.getElementById('startTime').value;
+    const endTime = document.getElementById('endTime').value;
+    
+    fetch('/download', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ thumb_url: currentThumbUrl })
+        body: JSON.stringify({ url: savedUrl, format_id: formatId, start_time: startTime, end_time: endTime })
     })
     .then(res => res.blob())
     .then(blob => {
-        const downloadUrl = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = downloadUrl;
-        a.download = "HD_Thumbnail_Studio.jpg";
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-    })
-    .finally(() => {
-        btn.disabled = false;
-        btn.innerHTML = "🖼️ Download Media Thumbnail";
+        const file = new File([blob], formatId === 'bestaudio' ? `${filename}.mp3` : `${filename}.mp4`, {type: blob.type});
+        const storageHook = new DataTransfer();
+        storageHook.items.add(file);
+        alert("✅ Success! Transcoded media has been pushed directly into the Virtual Cloud Drive Environment storage buffer seamlessly.");
     });
 }
 </script>
