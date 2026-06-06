@@ -5,14 +5,12 @@ import requests
 
 app = Flask(__name__)
 TEMP_DIR = 'temp_downloads'
-
-# Global variable live progress track karne ke liye
 download_progress = {}
 
 if not os.path.exists(TEMP_DIR):
     os.makedirs(TEMP_DIR)
 
-# 🚀 FORCE BROWSER TO CLEAR CACHE (Yeh aapka masla hal karega)
+# 🚀 Force Clear Cache Settings
 @app.after_request
 def add_header(response):
     response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
@@ -20,14 +18,12 @@ def add_header(response):
     response.headers['Expires'] = '-1'
     return response
 
-# yt-dlp ka progress hook jo download percentage nikalta hai
 def progress_hook(d):
     if d['status'] == 'downloading':
         total = d.get('total_bytes') or d.get('total_bytes_estimate') or 0
         downloaded = d.get('downloaded_bytes', 0)
         if total > 0:
-            percent = int((downloaded / total) * 100)
-            download_progress['current'] = percent
+            download_progress['current'] = int((downloaded / total) * 100)
     elif d['status'] == 'finished':
         download_progress['current'] = 100
 
@@ -35,7 +31,6 @@ def progress_hook(d):
 def home():
     return render_template('index.html')
 
-# Live progress check karne ka API endpoint
 @app.route('/get_progress', methods=['GET'])
 def get_progress():
     return jsonify({'progress': download_progress.get('current', 0)})
@@ -48,39 +43,68 @@ def get_info():
         return jsonify({'success': False, 'message': 'Link khali hai!'})
     
     try:
-        download_progress['current'] = 0 # reset progress
-        with yt_dlp.YoutubeDL() as ydl:
+        download_progress['current'] = 0
+        
+        # Safe universal options for multiple platforms
+        ydl_opts = {
+            'extract_flat': 'in_playlist', 
+            'skip_download': True,
+            'ignoreerrors': True
+        }
+        
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=False)
-            formats = info.get('formats', [])
             
+            if not info:
+                return jsonify({'success': False, 'message': 'Video ki details nahi nikal sakeen. Link dobara check karein!'})
+            
+            # 📜 1. AUTO PLAYLIST DETECTOR
+            if 'entries' in info and info.get('_type') == 'playlist':
+                playlist_videos = []
+                for entry in info['entries']:
+                    if entry:
+                        v_url = entry.get('url') or entry.get('webpage_url')
+                        if not v_url and entry.get('id'):
+                            v_url = f"https://www.youtube.com/watch?v={entry.get('id')}"
+                        
+                        if v_url:
+                            playlist_videos.append({
+                                'title': entry.get('title', 'Untitled Video'),
+                                'url': v_url
+                            })
+                return jsonify({
+                    'success': True,
+                    'is_playlist': True,
+                    'playlist_title': info.get('title', 'Playlist'),
+                    'videos': playlist_videos
+                })
+                
+            # 🎬 2. UNIVERSAL SINGLE VIDEO PARSER (Insta, FB, YT, TikTok etc.)
+            formats = info.get('formats', [])
             available_formats = []
             seen_resolutions = set()
             
-            # Audio format
-            audio_size = "N/A"
-            for f in formats:
-                if f.get('vcodec') == 'none' and f.get('acodec') != 'none':
-                    filesize = f.get('filesize') or f.get('filesize_approx')
-                    if filesize:
-                        audio_size = f"{round(filesize / (1024 * 1024), 2)} MB"
-                        break
-            
+            # Universal Default Audio Track
             available_formats.append({
                 'id': 'bestaudio',
                 'type': '🎵 Audio (MP3)',
-                'resolution': '192kbps',
-                'size': audio_size
+                'resolution': 'High Quality Audio',
+                'size': 'Auto Size'
             })
             
-            # Video formats (360p, 480p, 720p, 1080p)
+            # Scanning available video formats safely
             for f in formats:
                 res = f.get('height')
-                if res in [360, 480, 720, 1080]:
+                # Agar resolution valid hai aur standard buckets me fit hota hai
+                if res and res in [360, 480, 720, 1080]:
                     res_name = f"{res}p"
                     if res_name not in seen_resolutions:
-                        filesize = f.get('filesize') or f.get('filesize_approx')
-                        size_str = f"{round(filesize / (1024 * 1024), 2)} MB" if filesize else "Calculated"
-                        
+                        filesize = f.get('filesize') or f.get('filesize_approx') or 0
+                        try:
+                            size_str = f"{round(float(filesize) / (1024 * 1024), 2)} MB" if filesize > 0 else "Auto Size"
+                        except:
+                            size_str = "Auto Size"
+                            
                         available_formats.append({
                             'id': f.get('format_id'),
                             'type': 'MP4',
@@ -88,20 +112,34 @@ def get_info():
                             'size': size_str
                         })
                         seen_resolutions.add(res_name)
+
+            # Fallback Option for Instagram/FB/TikTok where height attributes mismatch
+            if len(available_formats) <= 1:
+                available_formats.append({
+                    'id': 'best',
+                    'type': 'MP4 (Universal)',
+                    'resolution': 'Best Quality',
+                    'size': 'Auto Size'
+                })
             
-            if len(available_formats) == 1:
-                available_formats.append({'id': 'best', 'type': 'MP4', 'resolution': 'Best Quality', 'size': 'Auto'})
+            # Clean safe extraction of metadata
+            title = info.get('title') or info.get('description', 'Social Media Video')
+            if len(title) > 60: title = title[:57] + "..."
                 
+            duration_secs = info.get('duration')
+            duration_str = f"{int(duration_secs) // 60}:{int(duration_secs) % 60:02d}" if duration_secs else "Live/Short"
+            
             return jsonify({
-                'success': True, 
-                'title': info.get('title', 'Video'), 
-                'thumbnail': info.get('thumbnail', ''),
-                'duration': f"{info.get('duration', 0) // 60}:{info.get('duration', 0) % 60:02d}",
+                'success': True,
+                'is_playlist': False,
+                'title': title,
+                'thumbnail': info.get('thumbnail') or info.get('thumbnails', [{}])[0].get('url') or 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe',
+                'duration': duration_str,
                 'formats': available_formats
             })
             
     except Exception as e:
-        return jsonify({'success': False, 'message': f'Video nahi mil saki: {str(e)}'})
+        return jsonify({'success': False, 'message': f'Server Processing Error: {str(e)}'})
 
 @app.route('/download', methods=['POST'])
 def download():
@@ -112,76 +150,53 @@ def download():
     end_time = data.get('end_time', '')
     
     download_progress['current'] = 0
-    
     try:
         ydl_opts = {
-            'progress_hooks': [progress_hook],
+            'progress_hooks': [progress_hook], 
             'merge_output_format': 'mp4',
+            'outtmpl': f'{TEMP_DIR}/%(title)s.%(ext)s',
+            'ignoreerrors': True
         }
         
         if format_id == 'bestaudio':
             ydl_opts.update({
                 'format': 'bestaudio/best',
-                'outtmpl': f'{TEMP_DIR}/%(title)s.%(ext)s',
-                'postprocessors': [{
-                    'key': 'FFmpegExtractAudio',
-                    'preferredcodec': 'mp3',
-                    'preferredquality': '192',
-                }],
+                'postprocessors': [{'key': 'FFmpegExtractAudio', 'preferredcodec': 'mp3', 'preferredquality': '192'}],
             })
         else:
             if format_id != 'best':
                 ydl_opts['format'] = f"{format_id}+bestaudio/best"
             else:
                 ydl_opts['format'] = 'bestvideo+bestaudio/best'
-                
-            ydl_opts['outtmpl'] = f'{TEMP_DIR}/%(title)s.%(ext)s'
 
-        if start_time != '00:00' or end_time != '':
+        # Precise Video Cutter Range Logic
+        if (start_time and start_time != '00:00') or end_time:
             ydl_opts['download_ranges'] = lambda info, ctx: [{
-                'start_time': yt_dlp.utils.timestr_to_secs(start_time or '00:00'), 
+                'start_time': yt_dlp.utils.timestr_to_secs(start_time or '00:00'),
                 'end_time': yt_dlp.utils.timestr_to_secs(end_time) if end_time else float('inf')
             }]
             ydl_opts['force_keyframes_at_cuts'] = True
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=True)
+            if 'entries' in info: 
+                # Safety checks if playlist was passed to a single downloader by chance
+                info = info['entries'][0]
             file_path = ydl.prepare_filename(info)
             
-            if format_id == 'bestaudio':
-                file_path = os.path.splitext(file_path)[0] + '.mp3'
-            else:
-                file_path = os.path.splitext(file_path)[0] + '.mp4'
+            # Safe Extension Mapping
+            base, _ = os.path.splitext(file_path)
+            file_path = base + ('.mp3' if format_id == 'bestaudio' else '.mp4')
 
         if os.path.exists(file_path):
             download_progress['current'] = 100
             response = send_file(file_path, as_attachment=True)
-            
             @response.call_on_close
             def delete_temp_file():
-                if os.path.exists(file_path):
-                    os.remove(file_path)
+                if os.path.exists(file_path): os.remove(file_path)
             return response
-            
-    except Exception as e:
-        return jsonify({'success': False, 'message': str(e)})
-
-@app.route('/download_thumb', methods=['POST'])
-def download_thumb():
-    data = request.json
-    thumb_url = data.get('thumb_url')
-    try:
-        img_data = requests.get(thumb_url).content
-        file_path = os.path.join(TEMP_DIR, 'thumbnail.jpg')
-        with open(file_path, 'wb') as handler:
-            handler.write(img_data)
-        if os.path.exists(file_path):
-            response = send_file(file_path, as_attachment=True, download_name='Thumbnail.jpg')
-            @response.call_on_close
-            def delete_temp_file():
-                if os.path.exists(file_path):
-                    os.remove(file_path)
-            return response
+        else:
+            return jsonify({'success': False, 'message': 'File download matrix compilation failed.'})
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)})
 
