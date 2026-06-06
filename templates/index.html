@@ -695,14 +695,14 @@
         }
         formats.forEach(f => {
             const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td><span class="res-badge">${f.resolution || f.quality || "Standard"}</span></td>
-                <td style="font-size:0.8rem;">${f.size || "~ varies"}</td>
-                <td class="action-group">
-                    <button class="btn-download" data-fid="${f.id}"><i class="fas fa-download"></i> Download</button>
-                    <button class="btn-drive" data-fid="${f.id}"><i class="fab fa-google-drive"></i> Drive</button>
-                </td>
-            `;
+            // Sirf Download button rakho
+tr.innerHTML = `
+    <td><span class="res-badge">${f.resolution || "Standard"}</span></td>
+    <td style="font-size:0.8rem;">${f.size || "~ varies"}</td>
+    <td class="action-group">
+        <button class="btn-download" data-fid="${f.id}"><i class="fas fa-download"></i> Download</button>
+    </td>
+`;
             formatsBody.appendChild(tr);
         });
         // attach events dynamically
