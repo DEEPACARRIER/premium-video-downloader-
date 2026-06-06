@@ -2,6 +2,12 @@ from flask import Flask, render_template, request, jsonify, send_file
 import yt_dlp
 import os
 import requests
+import json
+
+# Google Drive API Imports
+from googleapiclient.discovery import build
+from googleapiclient.http import MediaFileUpload
+from google.oauth2.service_account import Credentials
 
 app = Flask(__name__)
 TEMP_DIR = 'temp_downloads'
@@ -27,6 +33,30 @@ def progress_hook(d):
     elif d['status'] == 'finished':
         download_progress['current'] = 100
 
+# ☁️ GOOGLE DRIVE UPLOAD CORE FUNCTION (SAFE ENVIRONMENT VERSION)
+def upload_to_google_drive(file_path, file_name):
+    try:
+        SCOPES = ['https://www.googleapis.com/auth/drive.file']
+        
+        # 🔍 Render ke Environment Variables se config read karna
+        env_creds = os.environ.get('GOOGLE_CREDENTIALS_JSON')
+        if not env_creds:
+            return {"success": False, "message": "Server Config Error: Render par GOOGLE_CREDENTIALS_JSON nahi mila!"}
+            
+        creds_dict = json.loads(env_creds)
+        creds = Credentials.from_service_account_info(creds_dict, scopes=SCOPES)
+        service = build('drive', 'v3', credentials=creds)
+        
+        file_metadata = {'name': file_name}
+        mimetype = 'audio/mp3' if file_path.endswith('.mp3') else 'video/mp4'
+        
+        media = MediaFileUpload(file_path, mimetype=mimetype, resumable=True)
+        file = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
+        
+        return {"success": True, "file_id": file.get('id')}
+    except Exception as e:
+        return {"success": False, "message": str(e)}
+
 @app.route('/')
 def home():
     return render_template('index.html')
@@ -45,7 +75,6 @@ def get_info():
     try:
         download_progress['current'] = 0
         
-        # Safe universal options for multiple platforms
         ydl_opts = {
             'extract_flat': 'in_playlist', 
             'skip_download': True,
@@ -79,12 +108,11 @@ def get_info():
                     'videos': playlist_videos
                 })
                 
-            # 🎬 2. UNIVERSAL SINGLE VIDEO PARSER (Insta, FB, YT, TikTok etc.)
+            # 🎬 2. UNIVERSAL SINGLE VIDEO PARSER
             formats = info.get('formats', [])
             available_formats = []
             seen_resolutions = set()
             
-            # Universal Default Audio Track
             available_formats.append({
                 'id': 'bestaudio',
                 'type': '🎵 Audio (MP3)',
@@ -92,10 +120,8 @@ def get_info():
                 'size': 'Auto Size'
             })
             
-            # Scanning available video formats safely
             for f in formats:
                 res = f.get('height')
-                # Agar resolution valid hai aur standard buckets me fit hota hai
                 if res and res in [360, 480, 720, 1080]:
                     res_name = f"{res}p"
                     if res_name not in seen_resolutions:
@@ -113,7 +139,6 @@ def get_info():
                         })
                         seen_resolutions.add(res_name)
 
-            # Fallback Option for Instagram/FB/TikTok where height attributes mismatch
             if len(available_formats) <= 1:
                 available_formats.append({
                     'id': 'best',
@@ -122,7 +147,6 @@ def get_info():
                     'size': 'Auto Size'
                 })
             
-            # Clean safe extraction of metadata
             title = info.get('title') or info.get('description', 'Social Media Video')
             if len(title) > 60: title = title[:57] + "..."
                 
@@ -141,6 +165,7 @@ def get_info():
     except Exception as e:
         return jsonify({'success': False, 'message': f'Server Processing Error: {str(e)}'})
 
+# 📥 REGULAR LOCAL DOWNLOAD ROUTE
 @app.route('/download', methods=['POST'])
 def download():
     data = request.json
@@ -153,9 +178,9 @@ def download():
     try:
         ydl_opts = {
             'progress_hooks': [progress_hook], 
-            'merge_output_format': 'mp4',
             'outtmpl': f'{TEMP_DIR}/%(title)s.%(ext)s',
-            'ignoreerrors': True
+            'ignoreerrors': True,
+            'ext': 'mp4'
         }
         
         if format_id == 'bestaudio':
@@ -164,12 +189,12 @@ def download():
                 'postprocessors': [{'key': 'FFmpegExtractAudio', 'preferredcodec': 'mp3', 'preferredquality': '192'}],
             })
         else:
-            if format_id != 'best':
-                ydl_opts['format'] = f"{format_id}+bestaudio/best"
+            if format_id == 'best' or 'instagram' in url.lower() or 'facebook' in url.lower():
+                ydl_opts['format'] = 'best'
             else:
-                ydl_opts['format'] = 'bestvideo+bestaudio/best'
+                ydl_opts['format'] = f"{format_id}+bestaudio/best"
+                ydl_opts['merge_output_format'] = 'mp4'
 
-        # Precise Video Cutter Range Logic
         if (start_time and start_time != '00:00') or end_time:
             ydl_opts['download_ranges'] = lambda info, ctx: [{
                 'start_time': yt_dlp.utils.timestr_to_secs(start_time or '00:00'),
@@ -180,11 +205,9 @@ def download():
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=True)
             if 'entries' in info: 
-                # Safety checks if playlist was passed to a single downloader by chance
                 info = info['entries'][0]
             file_path = ydl.prepare_filename(info)
             
-            # Safe Extension Mapping
             base, _ = os.path.splitext(file_path)
             file_path = base + ('.mp3' if format_id == 'bestaudio' else '.mp4')
 
@@ -200,20 +223,67 @@ def download():
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)})
 
+# ☁️ REAL GOOGLE DRIVE PIPELINE ROUTE
+@app.route('/upload_drive', methods=['POST'])
+def handle_drive_upload():
+    data = request.json
+    url = data.get('url')
+    format_id = data.get('format_id')
+    start_time = data.get('start_time', '00:00')
+    end_time = data.get('end_time', '')
+    
+    download_progress['current'] = 0
+    try:
+        ydl_opts = {
+            'progress_hooks': [progress_hook], 
+            'outtmpl': f'{TEMP_DIR}/%(title)s.%(ext)s', 
+            'ignoreerrors': True, 
+            'ext': 'mp4'
+        }
+        
+        if format_id == 'bestaudio':
+            ydl_opts.update({
+                'format': 'bestaudio/best', 
+                'postprocessors': [{'key': 'FFmpegExtractAudio', 'preferredcodec': 'mp3', 'preferredquality': '192'}]
+            })
+        else:
+            if format_id == 'best' or 'instagram' in url.lower() or 'facebook' in url.lower():
+                ydl_opts['format'] = 'best'
+            else:
+                ydl_opts['format'] = f"{format_id}+bestaudio/best"
+                ydl_opts['merge_output_format'] = 'mp4'
+
+        if (start_time and start_time != '00:00') or end_time:
+            ydl_opts['download_ranges'] = lambda info, ctx: [{
+                'start_time': yt_dlp.utils.timestr_to_secs(start_time or '00:00'), 
+                'end_time': yt_dlp.utils.timestr_to_secs(end_time) if end_time else float('inf')
+            }]
+            ydl_opts['force_keyframes_at_cuts'] = True
+
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=True)
+            if 'entries' in info: 
+                info = info['entries'][0]
+            file_path = ydl.prepare_filename(info)
+            
+            base, _ = os.path.splitext(file_path)
+            ext = '.mp3' if format_id == 'bestaudio' else '.mp4'
+            file_path = base + ext
+            display_name = (info.get('title') or 'Cloud_File') + ext
+
+        if os.path.exists(file_path):
+            # Google Drive API calling
+            drive_result = upload_to_google_drive(file_path, display_name)
+            
+            # File ko space khali karne ke liye fauran delete karna
+            if os.path.exists(file_path): 
+                os.remove(file_path)
+                
+            return jsonify(drive_result)
+        else:
+            return jsonify({'success': False, 'message': 'Download failed before cloud compilation.'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
+
 if __name__ == '__main__':
     app.run(debug=True)
-from googleapiclient.discovery import build
-from googleapiclient.http import MediaFileUpload
-from google.oauth2.service_account import Credentials
-
-def upload_to_drive(file_path, file_name):
-    # credentials.json file se connect karne ka tareeqa
-    SCOPES = ['https://www.googleapis.com/auth/drive.file']
-    creds = Credentials.from_service_account_file('credentials.json', scopes=SCOPES)
-    service = build('drive', 'v3', credentials=creds)
-    
-    file_metadata = {'name': file_name}
-    media = MediaFileUpload(file_path, mimetype='video/mp4', resumable=True)
-    
-    file = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
-    return file.get('id')
