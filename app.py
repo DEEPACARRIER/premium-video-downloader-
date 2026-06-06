@@ -21,12 +21,30 @@ DEFAULT_HEADERS = {
     'Upgrade-Insecure-Requests': '1',
 }
 
+# 🍪 Cookies file ka path (Render environment variable se)
+COOKIES_FILE = os.environ.get('COOKIES_FILE_PATH', '')
+if COOKIES_FILE and not os.path.exists(COOKIES_FILE):
+    COOKIES_FILE = ''  # Agar file nahi hai to ignore kar do
+
 @app.after_request
 def add_header(response):
     response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate'
     response.headers['Pragma'] = 'no-cache'
     response.headers['Expires'] = '-1'
     return response
+
+def get_base_ydl_opts():
+    """Common ydl options dono jagah use karne ke liye"""
+    opts = {
+        'headers': DEFAULT_HEADERS,
+        'quiet': True,
+        'no_warnings': True,
+        'ignoreerrors': True,
+    }
+    # Agar cookies file hai to add karo
+    if COOKIES_FILE and os.path.exists(COOKIES_FILE):
+        opts['cookiefile'] = COOKIES_FILE
+    return opts
 
 def progress_hook(d):
     if d['status'] == 'downloading':
@@ -55,14 +73,12 @@ def get_info():
     try:
         download_progress['current'] = 0
         
-        ydl_opts = {
+        # 🔥 YAHAN PEHLI JAGHA - cookies add ho gayi
+        ydl_opts = get_base_ydl_opts()
+        ydl_opts.update({
             'extract_flat': 'in_playlist',
             'skip_download': True,
-            'ignoreerrors': True,
-            'headers': DEFAULT_HEADERS,
-            'quiet': True,
-            'no_warnings': True,
-        }
+        })
         
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=False)
@@ -77,7 +93,6 @@ def get_info():
                     if entry:
                         v_url = entry.get('url') or entry.get('webpage_url')
                         if not v_url and entry.get('id'):
-                            # YouTube playlist ke liye
                             if 'youtube' in url:
                                 v_url = f"https://www.youtube.com/watch?v={entry.get('id')}"
                             else:
@@ -100,14 +115,12 @@ def get_info():
             available_formats = []
             seen_resolutions = set()
             
-            # Pehle audio option
             available_formats.append({
                 'id': 'bestaudio',
                 'resolution': 'Audio Only (MP3)',
                 'size': '~ Auto'
             })
             
-            # Video formats - unique resolutions
             for f in formats:
                 res = f.get('height')
                 if res and res >= 144:
@@ -122,7 +135,6 @@ def get_info():
                         })
                         seen_resolutions.add(res_name)
             
-            # Sort resolutions (low to high)
             def get_res_num(x):
                 try:
                     return int(x['resolution'].replace('p', '').split()[0])
@@ -161,14 +173,12 @@ def download():
     download_progress['current'] = 0
     
     try:
-        ydl_opts = {
+        # 🔥 YAHAN DOOSRI JAGHA - cookies add ho gayi
+        ydl_opts = get_base_ydl_opts()
+        ydl_opts.update({
             'progress_hooks': [progress_hook],
             'outtmpl': f'{TEMP_DIR}/%(title)s.%(ext)s',
-            'ignoreerrors': True,
-            'quiet': True,
-            'no_warnings': True,
-            'headers': DEFAULT_HEADERS,
-        }
+        })
         
         if format_id == 'bestaudio':
             ydl_opts.update({
