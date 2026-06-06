@@ -324,40 +324,25 @@
         .btn-download {
             background: #eef2f9;
             border: none;
-            padding: 0.45rem 1rem;
+            padding: 0.5rem 1.2rem;
             border-radius: 2rem;
             font-weight: 600;
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             color: #1e3b5c;
             cursor: pointer;
             transition: 0.15s;
             display: inline-flex;
             align-items: center;
-            gap: 5px;
+            gap: 6px;
         }
 
         .btn-download i {
-            font-size: 0.7rem;
+            font-size: 0.75rem;
         }
 
         .btn-download:hover {
             background: #1f2f47;
             color: white;
-        }
-
-        .btn-drive {
-            background: #fef7e0;
-            border: none;
-            padding: 0.45rem 0.9rem;
-            border-radius: 2rem;
-            font-weight: 600;
-            font-size: 0.7rem;
-            color: #b26b00;
-            cursor: pointer;
-        }
-
-        .btn-drive:hover {
-            background: #ffecb3;
         }
 
         /* playlist styling - minimal professional */
@@ -426,10 +411,13 @@
             cursor: not-allowed;
         }
         
-        .no-timer-notice {
+        .info-note {
             font-size: 0.7rem;
             color: #8ba0bc;
-            margin-top: 0.25rem;
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
     </style>
 </head>
@@ -437,7 +425,7 @@
 <div class="app-container">
     <div class="studio-header">
         <h1><i class="fas fa-cloud-download-alt"></i> Nexus Download Hub</h1>
-        <div class="subhead">Professional media suite · YouTube · Instagram · Facebook · Playlists · Direct download & Drive export</div>
+        <div class="subhead">Professional media suite · YouTube · Instagram · Facebook · Playlists · High-speed downloads</div>
     </div>
 
     <div class="card-pane">
@@ -448,14 +436,14 @@
             </div>
             <button id="analyzeBtn" class="btn-primary"><i class="fas fa-waveform"></i> Analyze</button>
         </div>
-        <div class="no-timer-notice"><i class="fas fa-info-circle"></i> Full original video · no trimming options · clean downloads</div>
+        <div class="info-note"><i class="fas fa-download"></i> Full original quality · Direct downloads only</div>
     </div>
 
     <div id="statusMessage" class="status-area">
         <i class="fas fa-info-circle"></i> <span id="statusText">Ready — paste link and analyze</span>
     </div>
 
-    <!-- Progress container (only for download/upload feedback) -->
+    <!-- Progress container (only for download feedback) -->
     <div id="progressArea" class="progress-module">
         <div class="progress-bar-bg"><div id="progressFill" class="progress-fill"></div></div>
         <div id="progressMsg" class="progress-text">0%</div>
@@ -473,7 +461,7 @@
             <div class="format-table-wrapper">
                 <table class="format-table">
                     <thead>
-                        <tr><th>Quality</th><th>Approx. size</th><th>Actions</th></tr>
+                        <tr><th>Quality</th><th>Approx. size</th><th>Action</th></tr>
                     </thead>
                     <tbody id="formatsTableBody"></tbody>
                 </table>
@@ -493,7 +481,7 @@
     let currentUrl = "";
     let currentThumbnail = "";
     let currentMediaTitle = "";
-    let formatsList = []; // store format objects {id, resolution, size}
+    let formatsList = [];
     let isPlaylistMode = false;
     let progressInterval = null;
     let activeFetch = false;
@@ -513,7 +501,6 @@
     const bannerBtn = document.getElementById('bannerDownloadBtn');
     const formatsBody = document.getElementById('formatsTableBody');
 
-    // helper: reset UI except basic
     function resetUIForNewFetch() {
         if (progressInterval) clearInterval(progressInterval);
         progressContainer.style.display = "none";
@@ -540,7 +527,6 @@
         statusSpan.style.color = "#2c5f8a";
     }
 
-    // start progress simulation from server
     function startProgressTracking() {
         if (progressInterval) clearInterval(progressInterval);
         progressContainer.style.display = "block";
@@ -553,7 +539,7 @@
                     let prog = data.progress || 0;
                     if (prog > 100) prog = 100;
                     progressFill.style.width = prog + "%";
-                    progressMsgSpan.innerText = prog + "% · processing stream";
+                    progressMsgSpan.innerText = prog + "% · processing";
                     if (prog >= 100) {
                         clearInterval(progressInterval);
                         progressMsgSpan.innerText = "Complete!";
@@ -575,14 +561,13 @@
         }, 1200);
     }
 
-    // download trigger - NO TIMER PARAMETERS, full video
+    // PURE DOWNLOAD FUNCTION - NO DRIVE, NO TRIMMING
     function triggerDownload(formatId, btnElement) {
         if (!currentUrl) return;
         btnElement.disabled = true;
         showSuccess("Initiating secure download...");
         startProgressTracking();
 
-        // removed start_time / end_time completely — pure original media
         fetch('/download', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -608,41 +593,11 @@
         .catch(err => {
             console.warn(err);
             stopProgressTracking();
-            showError("Download error: server side issue");
+            showError("Download error: server issue");
             btnElement.disabled = false;
         });
     }
 
-    function saveToDrive(formatId, btnElement) {
-        if (!currentUrl) return;
-        btnElement.disabled = true;
-        showSuccess("Pushing to Google Drive ...");
-        startProgressTracking();
-
-        // removed any trimming params
-        fetch('/upload_drive', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ url: currentUrl, format_id: formatId })
-        })
-        .then(res => res.json())
-        .then(data => {
-            stopProgressTracking();
-            if (data.success) {
-                showSuccess(`Drive upload success! (ID: ${data.file_id?.slice(0,12)}...)`);
-            } else {
-                showError("Drive upload: " + (data.message || "failed"));
-            }
-            btnElement.disabled = false;
-        })
-        .catch(() => {
-            stopProgressTracking();
-            showError("Drive upload failed");
-            btnElement.disabled = false;
-        });
-    }
-
-    // render formats table
     function renderFormats(formats) {
         formatsBody.innerHTML = "";
         if (!formats || !formats.length) {
@@ -658,19 +613,14 @@
                 <td style="font-size:0.8rem;">${f.size || "~ varies"}</td>
                 <td class="action-group">
                     <button class="btn-download" data-fid="${f.id}"><i class="fas fa-download"></i> Download</button>
-                    <button class="btn-drive" data-fid="${f.id}"><i class="fab fa-google-drive"></i> Drive</button>
-                 </td>
+                </td>
             `;
             formatsBody.appendChild(tr);
         });
-        // attach events dynamically
+        // attach download events only
         document.querySelectorAll('.btn-download').forEach(btn => {
             const fid = btn.getAttribute('data-fid');
             btn.addEventListener('click', (e) => triggerDownload(fid, btn));
-        });
-        document.querySelectorAll('.btn-drive').forEach(btn => {
-            const fid = btn.getAttribute('data-fid');
-            btn.addEventListener('click', (e) => saveToDrive(fid, btn));
         });
     }
 
@@ -710,7 +660,7 @@
         resultsDiv.style.display = "grid";
         playlistDiv.style.display = "none";
         
-        // banner download handler (unchanged)
+        // banner artwork download (kept as useful feature)
         bannerBtn.onclick = () => {
             if (currentThumbnail) {
                 fetch(currentThumbnail)
@@ -736,7 +686,6 @@
         };
     }
 
-    // core fetch logic - NO TRIM REFERENCES ANYWHERE
     async function processLinkRequest() {
         const url = sourceInput.value.trim();
         if (!url) {
@@ -769,7 +718,7 @@
             } else {
                 isPlaylistMode = false;
                 handleSingleVideo(data);
-                showSuccess("Media info loaded · ready to download (no trimming)");
+                showSuccess("Media ready · click Download button");
             }
         } catch (err) {
             showError("Network error: " + (err.message || "server unreachable"));
@@ -783,8 +732,7 @@
     analyzeBtn.addEventListener('click', processLinkRequest);
     sourceInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') processLinkRequest(); });
     
-    // initial ready state
-    showSuccess("Ready — paste link and click Analyze (timer/trim removed)");
+    showSuccess("Ready — paste link and analyze (timer & drive removed)");
 </script>
 </body>
 </html>
