@@ -38,10 +38,23 @@ def progress_hook(d):
 def upload_to_google_drive(file_path, file_name):
     try:
         SCOPES = ['https://www.googleapis.com/auth/drive.file']
+        
+        # Pehle variable check karein, agar na mile toh file path check karein
         env_creds = os.environ.get('GOOGLE_CREDENTIALS_JSON')
+        
+        if not env_creds:
+            # Agar variable khali hai, toh secret file se read karo
+            secret_file_path = '/etc/secrets/credentials.json'
+            if os.path.exists(secret_file_path):
+                with open(secret_file_path, 'r') as f:
+                    env_creds = f.read()
+            else:
+                return {"success": False, "message": "Critical Error: credentials file nahi mili!"}
+            
         creds_dict = json.loads(env_creds)
         creds = Credentials.from_service_account_info(creds_dict, scopes=SCOPES)
         service = build('drive', 'v3', credentials=creds)
+        # ... (baqi code waisa hi rahega)
         
         # Yahan 'parents' mein us folder ki ID dalen jahan file bhejni hai
         # Agar folder ID nahi hai, toh file "root" mein jayegi (service account ki drive mein)
