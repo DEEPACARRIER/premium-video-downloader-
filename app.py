@@ -1,4 +1,3 @@
-```python
 from flask import Flask, render_template, request, jsonify, send_file
 import yt_dlp
 import os
@@ -328,4 +327,3 @@ if __name__ == '__main__':
         port=5000,
         debug=False
     )
-```
